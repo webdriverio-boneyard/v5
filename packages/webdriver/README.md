@@ -12,7 +12,7 @@ The following example demonstrates a simple Google Search scenario:
 ```js
 import WebDriver from 'webdriver'
 
-;(async () => {
+(async () => {
     const client = await WebDriver.newSession({
         path: '/',
         capabilities: { browserName: 'firefox' }
