@@ -36,6 +36,11 @@ describe('commands test', () => {
                 expect(e.message).toContain('command needs to be type of string')
             }
         })
+
+        it('should get the page source', async () => {
+            await browser.getSource()
+            expect(request.mock.calls[0][0].uri.path).toBe('/wd/hub/session/foobar-123/source')
+        })
     })
 
     describe('element commands', () => {
