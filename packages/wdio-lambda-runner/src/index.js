@@ -35,13 +35,24 @@ export default class AWSLambdaRunner extends EventEmitter {
         log.info('Generating temporary AWS Lamdba service directory at %s', this.serviceDir.name)
 
         /**
+         * link node_modules
+         */
+        fs.symlinkSync(this.nodeModulesDir, path.resolve(this.serviceDir.name, 'node_modules'))
+
+        /**
+         * link specs
+         */
+        this.specs.forEach((spec) => {
+            fs.symlinkSync(spec, path.join(this.serviceDir.name, spec.replace(process.cwd(), '')))
+        })
+
+        /**
          * create config
          */
         const runnerConfig = Object.assign(DEFAULT_CONFIG, {
-            nodeVersion: process.version.slice(1),
-            environment: process.env,
+            environment: {},
             package: {
-                include: [this.nodeModulesDir, ...this.specs],
+                include: [],
                 exclude: []
             }
         })
@@ -80,9 +91,9 @@ export default class AWSLambdaRunner extends EventEmitter {
     kill () {
     }
 
-    run (options) {
-        console.log(options)
-        console.log(this.nodeModulesDir)
-        console.log(process.version);
+    run (/*options*/) {
+        // console.log(options)
+        // console.log(this.nodeModulesDir)
+        // console.log(process.version);
     }
 }
