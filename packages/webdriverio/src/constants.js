@@ -1,3 +1,6 @@
+/* istanbul ignore next */
+const NOOP = () => {}
+
 const DEFAULT_TEST_TIMEOUT = 30000
 const HOOK_DEFINITION = {
     type: (param) => {
@@ -5,7 +8,7 @@ const HOOK_DEFINITION = {
          * option must be an array
          */
         if (!Array.isArray(param)) {
-            return false
+            throw new Error('a hook option needs to be a list of functions')
         }
 
         /**
@@ -19,7 +22,7 @@ const HOOK_DEFINITION = {
                 continue
             }
 
-            return false
+            throw new Error('expected hook to be type of function')
         }
 
         return true
@@ -40,13 +43,21 @@ export const WDIO_DEFAULTS = {
      * define specs for test execution
      */
     specs: {
-        type: (param) => Array.isArray(param)
+        type: (param) => {
+            if (!Array.isArray(param)) {
+                throw new Error('the "specs" options needs to be a list of strings')
+            }
+        }
     },
     /**
      * exclude specs from test execution
      */
     exclude: {
-        type: (param) => Array.isArray(param),
+        type: (param) => {
+            if (!Array.isArray(param)) {
+                throw new Error('the "exclude" options needs to be a list of strings')
+            }
+        },
         default: []
     },
     /**
@@ -108,7 +119,7 @@ export const WDIO_DEFAULTS = {
              * option must be an array
              */
             if (!Array.isArray(param)) {
-                return false
+                throw new Error('the "reporters" options needs to be a list of strings')
             }
 
             /**
@@ -130,7 +141,11 @@ export const WDIO_DEFAULTS = {
                     continue
                 }
 
-                return false
+                throw new Error(
+                    'a reporter should be either a string in the format "wdio-<reportername>-reporter" ' +
+                    'or a function/class. Please see the docs for more information on custom reporters ' +
+                    '(http://webdriver.io/guide/testrunner/reporters.html)'
+                )
             }
 
             return true
@@ -171,7 +186,10 @@ export const WDIO_DEFAULTS = {
     /**
      * hooks
      */
-    onPrepare: HOOK_DEFINITION,
+    onPrepare: {
+        type: 'function',
+        default: NOOP
+    },
     before: HOOK_DEFINITION,
     beforeSession: HOOK_DEFINITION,
     beforeSuite: HOOK_DEFINITION,
@@ -184,7 +202,10 @@ export const WDIO_DEFAULTS = {
     afterSuite: HOOK_DEFINITION,
     afterSession: HOOK_DEFINITION,
     after: HOOK_DEFINITION,
-    onComplete: HOOK_DEFINITION,
+    onComplete: {
+        type: 'function',
+        default: NOOP
+    },
     onError: HOOK_DEFINITION,
     onReload: HOOK_DEFINITION,
 

@@ -1,7 +1,7 @@
 import logger from 'wdio-logger'
 import { ConfigParser, initialisePlugin } from 'wdio-config'
 
-import { getLauncher, initReporters, runServiceHook } from './utils'
+import { getLauncher, runServiceHook } from './utils'
 
 const log = logger('wdio-cli:Launcher')
 
@@ -16,10 +16,9 @@ class Launcher {
         const specs = this.configParser.getSpecs()
 
         const Runner = initialisePlugin(config.runner, 'runner')
-        this.runner = new Runner(config, capabilities, specs)
+        this.runner = new Runner(configFile, config, capabilities, specs)
         this.runner.on('end', ::this.endHandler)
 
-        this.reporters = initReporters(config)
         this.argv = argv
         this.configFile = configFile
 
@@ -41,6 +40,8 @@ class Launcher {
         let config = this.configParser.getConfig()
         let caps = this.configParser.getCapabilities()
         let launcher = getLauncher(config)
+
+        await this.runner.initialise()
 
         /**
          * run onPrepare hook
@@ -77,7 +78,7 @@ class Launcher {
                 specs: this.configParser.getSpecs(capabilities.specs, capabilities.exclude),
                 availableInstances: capabilities.maxInstances || config.maxInstancesPerCapability,
                 runningInstances: 0,
-                seleniumServer: { host: config.host, port: config.port, protocol: config.protocol }
+                seleniumServer: { hostname: config.hostname, port: config.port, protocol: config.protocol }
             })
         }
 
@@ -203,7 +204,7 @@ class Launcher {
      * @param  {Array} specs  Specs to run
      * @param  {Number} cid  Capabilities ID
      */
-    startInstance (spec, caps, cid, server) {
+    startInstance (specs, caps, cid, server) {
         let config = this.configParser.getConfig()
         cid = this.getRunnerId(cid)
         let processNumber = this.runnerStarted + 1
@@ -252,7 +253,7 @@ class Launcher {
             argv: this.argv,
             caps,
             processNumber,
-            spec,
+            specs,
             server,
             isMultiremote: this.isMultiremote,
             execArgv

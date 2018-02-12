@@ -14,10 +14,6 @@
     "clean": "rm -rf ./build",
     "compile": "babel src/ -d build/",
     "postversion": "npm run build && git tag -d $(git tag -l)",
-    "release": "npm run release:patch",
-    "release:patch": "np patch --no-cleanup",
-    "release:minor": "np minor --no-cleanup",
-    "release:major": "np major --no-cleanup",
     "test": "run-s test:*",
     "test:eslint": "eslint src test",
     "test:unit": "jest"
@@ -36,10 +32,7 @@
     "url": "https://github.com/webdriverio/webdriverio/issues"
   },
   "dependencies": {
-    "deepmerge": "^2.0.1",
-    "gaze": "^1.1.2",
-    "wdio-config": "^0.1.0",
     "wdio-logger": "^0.1.0",
-    "webdriverio": "^5.0.0"
+    "wdio-runner": "^0.0.0"
   }
 }

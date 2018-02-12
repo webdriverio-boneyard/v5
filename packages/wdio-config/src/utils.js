@@ -1,56 +1,53 @@
-import pickBy from 'lodash.pickby'
-
-const DEFAULT_HOST = '127.0.0.1'
+const DEFAULT_HOSTNAME = '127.0.0.1'
 const DEFAULT_PORT = 4444
 
 /**
  * helper to detect the Selenium backend according to given capabilities
  */
 export function detectBackend (options = {}) {
-    const { port, host, key } = options
-
-    /**
-     * don't detect anything if host or port is given or
-     * if no creds are given default to local WebDriver server
-     */
-    if (host || port || (!options.user && !options.key)) {
-        return Object.assign({
-            host: DEFAULT_HOST,
-            port: DEFAULT_PORT
-        }, pickBy({ host, port }))
-    }
+    const { port, hostname, user, key } = options
 
     /**
      * browserstack
      * e.g. zHcv9sZ39ip8ZPsxBVJ2
      */
-    if (key.length === 20) {
-        return Object.assign(pickBy({ host, port }), {
-            host: 'hub.browserstack.com',
+    if (typeof user === 'string' && key.length === 20) {
+        return {
+            hostname: 'hub.browserstack.com',
             port: 80
-        })
+        }
     }
 
     /**
      * testingbot
      * e.g. ec337d7b677720a4dde7bd72be0bfc67
      */
-    if (key.length === 32) {
-        return Object.assign(pickBy({ host, port }), {
-            host: 'hub.testingbot.com',
+    if (typeof user === 'string' && key.length === 32) {
+        return {
+            hostname: 'hub.testingbot.com',
             port: 80
-        })
+        }
     }
 
     /**
      * Sauce Labs
      * e.g. 50aa152c-1932-B2f0-9707-18z46q2n1mb0
      */
-    return Object.assign(pickBy({ host, port }), {
-        protocol: 'https',
-        host: 'ondemand.saucelabs.com',
-        port: 443
-    })
+    if (typeof user === 'string' && key.length === 36) {
+        return {
+            protocol: 'https',
+            hostname: 'ondemand.saucelabs.com',
+            port: 443
+        }
+    }
+
+    /**
+     * no cloud provider detected, fallback to local browser driver
+     */
+    return {
+        hostname: hostname || DEFAULT_HOSTNAME,
+        port: port || DEFAULT_PORT
+    }
 }
 
 /**
@@ -66,7 +63,7 @@ export function initialisePlugin (name, type) {
         return require(pkgName)
     } catch (e) {
         if (!e.message.match(`Cannot find module '${pkgName}'`)) {
-            throw new Error(`Couldn't initialise ${type} "${name}".\n${e.stack}`)
+            throw new Error(`Couldn't initialise "${name}" ${type}.\n${e.stack}`)
         }
 
         throw new Error(
@@ -96,8 +93,12 @@ export function validateConfig (defaults, options) {
                 throw new Error(`Expected option "${name}" to be type of ${expectedOption.type} but was ${typeof options[name]}`)
             }
 
-            if (typeof expectedOption.type === 'function' && !expectedOption.type(options[name])) {
-                throw new Error(`Option "${name}" failed type check ${expectedOption.type}`)
+            if (typeof expectedOption.type === 'function') {
+                try {
+                    expectedOption.type(options[name])
+                } catch (e) {
+                    throw new Error(`Type check for option "${name}" failed: ${e.message}`)
+                }
             }
 
             if (expectedOption.match && !options[name].match(expectedOption.match)) {
