@@ -1,6 +1,6 @@
 import ConfigParser from './lib/ConfigParser'
 import { validateConfig, detectBackend, initialisePlugin } from './utils'
-import { runInFiberContext, wrapCommands, executeHooksWithArgs } from './shim'
+import { runInFiberContext, wrapCommand, wrapCommands, executeHooksWithArgs } from './shim'
 
 export default {
     validateConfig,
@@ -11,7 +11,8 @@ export default {
     /**
      * wdio-sync shim
      */
-    runInFiberContext,
+    wrapCommand,
     wrapCommands,
+    runInFiberContext,
     executeHooksWithArgs
 }

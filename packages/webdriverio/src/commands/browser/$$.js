@@ -32,11 +32,13 @@
  */
 import { webdriverMonad } from 'webdriver'
 
-import { findStrategy, liftElement, getElementFromResponse } from '../../utils'
+import { findStrategy, getPrototype, getElementFromResponse } from '../../utils'
+import { wrapCommands } from 'wdio-config'
 
 export default async function $ (selector) {
     const { using, value } = findStrategy(selector)
     const res = await this.findElements(using, value)
+    const protoype = getPrototype()
 
     const elements = res.map((res, i) => {
         const element = webdriverMonad(this.options, (client) => {
@@ -45,10 +47,11 @@ export default async function $ (selector) {
             client.index = i
             client.emit = ::this.emit
             return client
-        })
+        }, protoype)
 
-        liftElement(element)
-        return element(this.sessionId)
+        const instance = element(this.sessionId)
+        wrapCommands(instance, this.options.beforeCommand, this.options.afterCommand)
+        return instance
     })
 
     return elements

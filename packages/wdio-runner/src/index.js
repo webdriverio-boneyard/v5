@@ -2,7 +2,7 @@ import merge from 'deepmerge'
 import EventEmitter from 'events'
 
 import logger from 'wdio-logger'
-import { ConfigParser, initialisePlugin } from 'wdio-config'
+import { ConfigParser, initialisePlugin, wrapCommand } from 'wdio-config'
 import { remote, multiremote } from 'webdriverio'
 
 import BaseReporter from './reporter'
@@ -44,31 +44,33 @@ export default class Runner extends EventEmitter {
 
         try {
             await runHook('beforeSession', config, this.caps, this.specs)
+            console.log('1');
             const browser = global.browser = await this.initialiseInstance(m.isMultiremote, this.caps)
+            console.log('2', browser);
 
             /**
              * register beforeCommand event
              */
-            browser.on('command', (command) => {
-                const runnerInfo = {
-                    cid: m.cid,
-                    sessionId: browser.sessionId,
-                    capabilities: browser.options.capabilities
-                }
-                this.reporter.emit('client:beforeCommand', Object.assign(command, runnerInfo))
-            })
-
-            /**
-             * register afterCommand event
-             */
-            browser.on('result', (result) => {
-                const runnerInfo = {
-                    cid: m.cid,
-                    sessionId: browser.sessionId,
-                    capabilities: browser.options.capabilities
-                }
-                this.reporter.emit('client:afterCommand', Object.assign(result, runnerInfo))
-            })
+            // browser.on('command', (command) => {
+            //     const runnerInfo = {
+            //         cid: m.cid,
+            //         sessionId: browser.sessionId,
+            //         capabilities: browser.options.capabilities
+            //     }
+            //     this.reporter.emit('client:beforeCommand', Object.assign(command, runnerInfo))
+            // })
+            //
+            // /**
+            //  * register afterCommand event
+            //  */
+            // browser.on('result', (result) => {
+            //     const runnerInfo = {
+            //         cid: m.cid,
+            //         sessionId: browser.sessionId,
+            //         capabilities: browser.options.capabilities
+            //     }
+            //     this.reporter.emit('client:afterCommand', Object.assign(result, runnerInfo))
+            // })
 
             /**
              * initialisation successful, send start message
@@ -84,8 +86,8 @@ export default class Runner extends EventEmitter {
             /**
              * register global helper method to fetch elements
              */
-            global.$ = ::browser.$
-            global.$$ = ::browser.$$
+            global.$ = (selector) => global.browser.$(selector)
+            global.$$ = (selector) => global.browser.$$(selector)
 
             /**
              * kill session of SIGINT signal showed up while trying to
@@ -103,6 +105,7 @@ export default class Runner extends EventEmitter {
             await runHook('afterSession', config, this.caps, this.specs)
             return this.shutdown(failures)
         } catch (e) {
+            console.log(e);
             log.error(e)
             return this.shutdown(1)
         }
@@ -134,7 +137,18 @@ export default class Runner extends EventEmitter {
         if (!isMultiremote) {
             log.debug('init remote session')
             config.capabilities = capabilities
-            return remote(config)
+            return remote(config, (client, options) => {
+                const protoype = {}
+                for (const commandName of client.commandList) {
+                    protoype[commandName] = { value: wrapCommand(commandName, client[commandName]) }
+                }
+
+                protoype.commandList = { value: client.commandList }
+                const newClient = Object.create(Object.prototype, protoype)
+                newClient.sessionId = client.sessionId
+                newClient.options = options
+                return newClient
+            })
         }
 
         let options = {}
