@@ -123,7 +123,6 @@ class SpecReporter extends WDIOReporter {
 
             // Get the indent/starting point for this suite
             const suiteIndent = this.indent(suite.uid)
-            const suiteTitle = suite.title
 
             // Display the title of the suite
             output.push(`${suiteIndent}${suite.title}`)
