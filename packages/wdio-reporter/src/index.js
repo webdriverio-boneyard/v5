@@ -117,7 +117,6 @@ export default class WDIOReporter extends EventEmitter {
     onBeforeCommand () {}
     onAfterCommand () {}
     onScreenshot () {}
-    onRunnerStart () {}
     onSuiteStart () {}
     onHookStart () {}
     onHookEnd () {}
