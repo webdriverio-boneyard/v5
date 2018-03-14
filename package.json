@@ -42,7 +42,7 @@
     "shelljs": "^0.8.1"
   },
   "jest": {
-    "testRegex": "(/__tests__/.*|(\\.|/).+\\.(test|spec))\\.jsx?$",
+    "testRegex": "(/tests/.*|(\\.|/).+\\.(test|spec))\\.jsx?$",
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/build/",
