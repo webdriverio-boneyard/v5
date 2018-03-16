@@ -7,19 +7,19 @@
  * <example>
     :clearElement.js
     it('should demonstrate the clearElement command', function () {
-        var input = $('.input')
-        input.setValue('test123')
-        console.log(input.getValue()) // returns 'test123'
-        input.clearElement()
-        // or
-        browser.clearElement('.input')
-        var value = browser.getValue('.input')
+        const elem = $('.input')
+        elem.setValue('test123')
+
+        const value = elem.getValue() 
+        console.log(value) // returns 'test123'
+        
+        elem.clearElement()
+        value = elem.getValue()
         assert(value === ''); // true
     })
  * </example>
  *
  * @alias browser.clearElement
- * @param {String} selector input element
  * @uses protocol/elements, protocol/elementIdClear
  * @type action
  *

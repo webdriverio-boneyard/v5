@@ -52,8 +52,13 @@ describe('utils', () => {
     })
 
     it('getPrototype', () => {
-        const proto = getPrototype()
-        expect(typeof proto).toBe('object')
-        expect(typeof proto.status.value).toBe('function')
+        const jsonWireProtocolPrototype = getPrototype()
+        expect(jsonWireProtocolPrototype instanceof Object).toBe(true)
+        expect(typeof jsonWireProtocolPrototype.sendKeys.value).toBe('function')
+
+        const webdriverPrototype = getPrototype(true)
+        expect(webdriverPrototype instanceof Object).toBe(true)
+        expect(typeof webdriverPrototype.sendKeys).toBe('undefined')
+        expect(typeof webdriverPrototype.performActions.value).toBe('function')
     })
 })
