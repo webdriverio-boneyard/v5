@@ -18,6 +18,8 @@ class SpecReporter extends WDIOReporter {
             failed : 0,
             skipped : 0
         }
+
+        this.chalk = chalk
     }
 
     onSuiteStart (suite) {
@@ -42,28 +44,18 @@ class SpecReporter extends WDIOReporter {
         this.stateCounts.skipped++
     }
 
-    onEnd (runner) {
+    onRunnerEnd (runner) {
+        this.printReport(runner)
+    }
+
+    /**
+     * Print the report to the screen
+     */
+    printReport(runner) {
         let output  = []
         let duration = `(${prettyMs(runner._duration)})`
-        const preface = `[${this.getEnviromentCombo(runner.capabilities, false)} #${runner.cid}]`
-        const combo = this.getEnviromentCombo(runner.capabilities)
+        const preface = `[${this.getEnviromentCombo(runner.capabilities, false).trim()} #${runner.cid}]`
         const divider = '------------------------------------------------------------------'
-
-        // Session id won't be available when running multiremote tests
-        if (runner.sessionID) {
-            output.push(`Session ID: ${runner.sessionID}`)
-        }
-
-        // Spec file name
-        output.push(`Spec: ${runner.specs[0]}`)
-
-        // Enviroment information
-        if (combo) {
-            output.push(`Running: ${combo}`)
-        }
-
-        // Put line break after general header data
-        output.push(' ')
 
         // Get the results
         const results = this.getResultDisplay()
@@ -73,37 +65,38 @@ class SpecReporter extends WDIOReporter {
             return
         }
 
-        // Combine result output with the main output
-        output = [...output, ...results]
-
-        // Get the counts
-        output = [...output, ...this.getCountDisplay(duration)]
-
-        // Get failures, if any
-        const failures = this.getFailureDisplay()
-
-        if (failures.length > 0) {
-            // Combine failures with the main output
-            output = [...output, ...failures]
-        }
+        output = [
+            ...this.getHeaderDisplay(runner),
+            ...results,
+            ...this.getCountDisplay(duration),
+            ...this.getFailureDisplay(),
+        ]
 
         // Prefix all values with the browser information
         output = output.map((value) => {
-            return `${preface} ${value}`
+            return value ? `${preface} ${value}` : preface
         })
 
         // Output the results
-        process.stdout.write(`${divider}\n${output.join(`\n`)}\n\n\n`)
+       process.stdout.write(`${divider}\n${output.join(`\n`)}\n`)
     }
 
     /**
-     * Indent a suite based on where how it's nested
-     * @param  {String} uid Unique suite key
-     * @return {String}     Spaces for indentation
+     * Get the header display for the report
+     * @param  {Object} runner Runner data
+     * @return {Array}         Header data
      */
-    indent (uid) {
-        const indents = this.suiteIndents[uid]
-        return indents === 0 ? '' : Array(indents).join('    ')
+    getHeaderDisplay(runner) {
+        const combo = this.getEnviromentCombo(runner.capabilities).trim()
+
+        // Spec file name and enviroment information
+        const output = [
+            `Spec: ${runner.specs[0]}`,
+            `Running: ${combo}`,
+            '',
+        ]
+
+        return output
     }
 
     /**
@@ -133,11 +126,11 @@ class SpecReporter extends WDIOReporter {
                 const test_indent = `${this.defaultTestIndent}${suiteIndent}`
 
                 // Output for a single test
-                output.push(`${test_indent}${chalk[this.getColor(state)](this.getSymbol(state))} ${test_title}`)
+                output.push(`${test_indent}${this.chalk[this.getColor(state)](this.getSymbol(state))} ${test_title}`)
             }
 
             // Put a line break after each suite
-            output.push(' ')
+            output.push('')
         }
 
         return output
@@ -154,21 +147,21 @@ class SpecReporter extends WDIOReporter {
         // Get the passes
         if(this.stateCounts.passed > 0) {
             const text = `${this.stateCounts.passed} passing ${duration}`
-            output.push(chalk[this.getColor(`passed`)](text))
+            output.push(this.chalk[this.getColor(`passed`)](text))
             duration = ''
         }
 
         // Get the failures
         if(this.stateCounts.failed > 0) {
-            const text = `${this.stateCounts.failed} failing ${duration}`
-            output.push(chalk[this.getColor(`failed`)](text))
+            const text = `${this.stateCounts.failed} failing ${duration}`.trim()
+            output.push(this.chalk[this.getColor(`failed`)](text))
             duration = ''
         }
 
         // Get the skipped tests
         if(this.stateCounts.skipped > 0) {
-            const text = `${this.stateCounts.skipped} skipped ${duration}`
-            output.push(chalk[this.getColor(`skipped`)](text))
+            const text = `${this.stateCounts.skipped} skipped ${duration}`.trim()
+            output.push(this.chalk[this.getColor(`skipped`)](text))
         }
 
         return output
@@ -195,10 +188,10 @@ class SpecReporter extends WDIOReporter {
 
                 // If we get here then there is a failed test
                 output.push(
-                    ' ',
+                    '',
                     `${++failureLength}) ${suiteTitle} ${testTitle}`,
-                    chalk.red(test.error.message),
-                    ...test.error.stack.split(/\n/g).map(value => chalk.gray(value))
+                    this.chalk.red(test.error.message),
+                    ...test.error.stack.split(/\n/g).map(value => this.chalk.gray(value))
                 )
             }
         }
@@ -226,9 +219,17 @@ class SpecReporter extends WDIOReporter {
             }
         }
 
-
-
         return this.orderedSuites
+    }
+
+    /**
+     * Indent a suite based on where how it's nested
+     * @param  {String} uid Unique suite key
+     * @return {String}     Spaces for indentation
+     */
+    indent (uid) {
+        const indents = this.suiteIndents[uid]
+        return indents === 0 ? '' : Array(indents).join('    ')
     }
 
     /**
@@ -237,18 +238,17 @@ class SpecReporter extends WDIOReporter {
      * @return {String}       Symbol to display
      */
     getSymbol (state) {
-        const allSymbols = symbols()
         let symbol = '?' // in case of an unknown state
 
         switch (state) {
         case 'passed':
-            symbol = allSymbols.ok
+            symbol = '✓'
             break
         case 'skipped':
             symbol = '-'
             break
         case 'failed':
-            symbol = allSymbols.err
+            symbol = '✖'
             break
         }
 
@@ -309,22 +309,6 @@ class SpecReporter extends WDIOReporter {
         }
 
         return browser + (version ? ` (v${version})` : '') + (platform ? ` on ${platform}` : '')
-    }
-}
-
-/**
- * @todo Move this into wdio-reporter/src/utils
- * Couldn't get this to import, I might be missing something with lerna
- *
- * list of reporting symbols
- * @return {Object} Symbols
- */
-function symbols() {
-    return {
-        ok: '✓',
-        err: '✖',
-        dot: '․',
-        error: 'F'
     }
 }
 
