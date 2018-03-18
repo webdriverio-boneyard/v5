@@ -108,12 +108,12 @@ describe('SpecReporter', () => {
 
     describe('printReport', () => {
         let originalWrite = null
-        let printReporter = null;
+        let printReporter = null
 
         beforeEach(() => {
             originalWrite = process.stdout.write
             printReporter = new SpecReporter()
-            printReporter.chalk.level = 0;
+            printReporter.chalk.level = 0
             process.stdout.write = jest.fn()
         })
 
@@ -158,7 +158,7 @@ describe('SpecReporter', () => {
 
     describe('getResultDisplay', () => {
         it('should validate the result output with tests', () => {
-            tmpReporter.suiteUids = SUITE_UIDS
+            tmpReporter.getOrderedSuites = jest.fn(() => SUITES)
             tmpReporter.suites = SUITES
 
             const result = tmpReporter.getResultDisplay()
@@ -179,7 +179,7 @@ describe('SpecReporter', () => {
         })
 
         it('should validate the result output with no tests', () => {
-            tmpReporter.suiteUids = SUITE_UIDS
+            tmpReporter.getOrderedSuites = jest.fn(() => SUITES_NO_TESTS)
             tmpReporter.suites = SUITES_NO_TESTS
 
             const result = tmpReporter.getResultDisplay()
@@ -190,7 +190,7 @@ describe('SpecReporter', () => {
 
     describe('getCountDisplay', () => {
         it('should return only passing counts', () => {
-            tmpReporter.stateCounts.passed = 2;
+            tmpReporter.stateCounts.passed = 2
             const result = tmpReporter.getCountDisplay(5)
 
             expect(result.length).toBe(1)
@@ -198,8 +198,8 @@ describe('SpecReporter', () => {
         })
 
         it('should return passing and failing counts', () => {
-            tmpReporter.stateCounts.passed = 2;
-            tmpReporter.stateCounts.failed = 1;
+            tmpReporter.stateCounts.passed = 2
+            tmpReporter.stateCounts.failed = 1
             const result = tmpReporter.getCountDisplay(5)
 
             expect(result.length).toBe(2)
@@ -208,8 +208,8 @@ describe('SpecReporter', () => {
         })
 
         it('should return failing and skipped counts', () => {
-            tmpReporter.stateCounts.failed = 1;
-            tmpReporter.stateCounts.skipped = 2;
+            tmpReporter.stateCounts.failed = 1
+            tmpReporter.stateCounts.skipped = 2
             const result = tmpReporter.getCountDisplay(5)
 
             expect(result.length).toBe(2)
@@ -218,7 +218,7 @@ describe('SpecReporter', () => {
         })
 
         it('should only display skipped with duration', () => {
-            tmpReporter.stateCounts.skipped = 2;
+            tmpReporter.stateCounts.skipped = 2
             const result = tmpReporter.getCountDisplay(5)
 
             expect(result.length).toBe(1)
@@ -228,7 +228,7 @@ describe('SpecReporter', () => {
 
     describe('getFailureDisplay', () => {
         it('should return failing results', () => {
-            tmpReporter.suiteUids = SUITE_UIDS
+            tmpReporter.getOrderedSuites = jest.fn(() => SUITES)
             tmpReporter.suites = SUITES
 
             const result = tmpReporter.getFailureDisplay()
@@ -241,7 +241,7 @@ describe('SpecReporter', () => {
         })
 
         it('should return no results', () => {
-            tmpReporter.suiteUids = SUITE_UIDS
+            tmpReporter.getOrderedSuites = jest.fn(() => SUITES_NO_TESTS)
             tmpReporter.suites = SUITES_NO_TESTS
 
             const result = tmpReporter.getFailureDisplay()

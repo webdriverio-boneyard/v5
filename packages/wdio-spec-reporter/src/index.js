@@ -78,7 +78,7 @@ class SpecReporter extends WDIOReporter {
         })
 
         // Output the results
-       process.stdout.write(`${divider}\n${output.join(`\n`)}\n`)
+        process.stdout.write(`${divider}\n${output.join(`\n`)}\n`)
     }
 
     /**
