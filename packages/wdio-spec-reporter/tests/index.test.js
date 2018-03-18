@@ -217,7 +217,7 @@ describe('SpecReporter', () => {
             expect(result[1]).toBe('2 skipped')
         })
 
-        it('should only dispay skipped with duration', () => {
+        it('should only display skipped with duration', () => {
             tmpReporter.stateCounts.skipped = 2;
             const result = tmpReporter.getCountDisplay(5)
 
