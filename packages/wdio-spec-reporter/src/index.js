@@ -52,8 +52,7 @@ class SpecReporter extends WDIOReporter {
      * Print the report to the screen
      */
     printReport(runner) {
-        let output  = []
-        let duration = `(${prettyMs(runner._duration)})`
+        const duration = `(${prettyMs(runner._duration)})`
         const preface = `[${this.getEnviromentCombo(runner.capabilities, false).trim()} #${runner.cid}]`
         const divider = '------------------------------------------------------------------'
 
@@ -65,7 +64,7 @@ class SpecReporter extends WDIOReporter {
             return
         }
 
-        output = [
+        const output = [
             ...this.getHeaderDisplay(runner),
             ...results,
             ...this.getCountDisplay(duration),
@@ -73,12 +72,12 @@ class SpecReporter extends WDIOReporter {
         ]
 
         // Prefix all values with the browser information
-        output = output.map((value) => {
+        const prefacedOutput = output.map((value) => {
             return value ? `${preface} ${value}` : preface
         })
 
         // Output the results
-        process.stdout.write(`${divider}\n${output.join(`\n`)}\n`)
+        process.stdout.write(`${divider}\n${prefacedOutput.join(`\n`)}\n`)
     }
 
     /**
