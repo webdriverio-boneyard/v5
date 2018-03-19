@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import SpecReporter from '../'
+import SpecReporter from '../src'
 import {
     RUNNER,
     SUITE_UIDS,
