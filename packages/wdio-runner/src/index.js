@@ -1,3 +1,5 @@
+import fs from 'fs'
+import util from 'util'
 import merge from 'deepmerge'
 import EventEmitter from 'events'
 
@@ -39,7 +41,7 @@ export default class Runner extends EventEmitter {
         this.initialiseServices(config)
 
         this.framework = initialisePlugin(config.framework, 'framework').adapterFactory
-        this.reporter = new BaseReporter(config.reporters, config.reporterOptions)
+        this.reporter = new BaseReporter(config, this.cid)
         this.inWatchMode = Boolean(config.watch)
 
         try {
@@ -97,6 +99,7 @@ export default class Runner extends EventEmitter {
             }
 
             const failures = await this.framework.run(m.cid, config, m.specs, this.caps, this.reporter)
+            await this.fetchDriverLogs()
             await browser.deleteSession()
             delete browser.sessionId
 
@@ -106,6 +109,34 @@ export default class Runner extends EventEmitter {
             log.error(e)
             return this.shutdown(1)
         }
+    }
+
+    /**
+     * fetch logs provided by browser driver
+     */
+    async fetchDriverLogs () {
+        /**
+         * only fetch logs if driver supports it
+         */
+        if (typeof global.browser.getLogs !== 'function') {
+            return
+        }
+
+        const logTypes = await global.browser.getLogTypes()
+        log.debug(`Fetching logs for ${logTypes.join(', ')}`)
+        return Promise.all(logTypes.map(async (logType) => {
+            const logs = await global.browser.getLogs(logType)
+
+            /**
+             * don't write to file if no logs were captured
+             */
+            if (logs.length === 0) {
+                return
+            }
+
+            const stringLogs = logs.map((log) => JSON.stringify(log)).join('\n')
+            return util.promisify(fs.writeFile)(`wdio-${this.cid}-${logType}.log`, stringLogs, 'utf-8')
+        }))
     }
 
     /**

@@ -8,8 +8,8 @@ export const DEFAULT_CONFIGS = {
     specs: [],
     suites: {},
     exclude: [],
-    logLevel: 'silent',
-    coloredLogs: true,
+    logDir: process.cwd(),
+    logLevel: 'trace',
     deprecationWarnings: true,
     baseUrl: null,
     bail: 0,
@@ -23,7 +23,8 @@ export const DEFAULT_CONFIGS = {
     connectionRetryTimeout: 90000,
     connectionRetryCount: 3,
     debug: false,
-    execArgv: null,
+    execArgv: [],
+    runnerEnv: {},
     runner: 'local',
 
     /**
