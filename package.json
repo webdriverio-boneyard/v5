@@ -13,7 +13,7 @@
     "release:patch": "lerna run release:patch --scope",
     "release:minor": "lerna run release:minor --scope",
     "release:major": "lerna run release:major --scope",
-    "setup": "run-s install bootstrap build",
+    "setup": "run-s bootstrap build",
     "test": "run-s test:*",
     "test:eslint": "eslint packages",
     "test:coverage": "jest --coverage",
