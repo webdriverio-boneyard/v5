@@ -14,7 +14,7 @@ exports.config = {
     // NPM script (see https://docs.npmjs.com/cli/run-script) then the current working
     // directory is where your package.json resides, so `wdio` will be called from there.
     //
-    specs: ['./specs/sync.spec.js'],
+    specs: ['./specs/sync*'],
     // Patterns to exclude.
     exclude: [],
     //
@@ -33,7 +33,7 @@ exports.config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 1,
+    maxInstances: 4,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
@@ -55,7 +55,7 @@ exports.config = {
     sync: true,
     //
     // Level of logging verbosity: trace | debug | info | warn | error
-    logLevel: 'trace',
+    logLevel: 'info',
     //
     // Enables colors for log output.
     coloredLogs: true,
@@ -120,7 +120,7 @@ exports.config = {
     // Test reporter for stdout.
     // The only one supported by default is 'dot'
     // see also: http://webdriver.io/guide/reporters/dot.html
-    reporters: ['dot'],
+    reporters: ['dot' ,'spec'],
     //
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/

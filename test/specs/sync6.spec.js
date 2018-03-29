@@ -5,8 +5,9 @@ describe('My awesome feature', () => {
         browser.url('http://google.com')
 
         const title = browser.getTitle()
-        assert.equal(title, 'Google')
+        assert.equal(title, 'Goo2gle')
 
-        console.log('This is test 1 with result:', title) // eslint-disable-line
+        console.log('This is test 6 with result:', title) // eslint-disable-line
+        browser.pause(4000)
     })
 })
