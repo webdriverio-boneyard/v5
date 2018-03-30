@@ -26,7 +26,7 @@ export default class LocalRunner extends EventEmitter {
             /**
              * ensure that logs are colored in wdio-cli interface
              */
-            FORCE_COLOR: true
+            // FORCE_COLOR: false
         })
 
         const childProcess = child.fork(path.join(__dirname, 'run.js'), process.argv.slice(2), {
