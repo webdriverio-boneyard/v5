@@ -1,0 +1,31 @@
+{
+  "name": "eslint-plugin-wdio",
+  "version": "0.0.1",
+  "description": "Eslint rules for WebdriverIO",
+  "author": "Christian Bromann <christian@saucelabs.com>",
+  "homepage": "https://github.com/webdriverio/webdriverio/packages/eslint-plugin-wdio",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/webdriverio/webdriverio.git"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin",
+    "webdriver",
+    "wdio",
+    "wdio-reporter"
+  ],
+  "scripts": {
+    "release": "np patch",
+    "release:patch": "np patch",
+    "release:minor": "np minor",
+    "release:major": "np major"
+  },
+  "bugs": {
+    "url": "https://github.com/webdriverio/webdriverio/issues"
+  },
+  "dependencies": {}
+}
