@@ -21,15 +21,15 @@
     });
  * </example>
  *
- * @alias browser.selectByIndex
+ * @alias element.selectByIndex
  * @param {String} selector   select element that contains the options
  * @param {Number} index      option index
- * @uses protocol/element, protocol/elementIdElements, protocol/elementIdClick
+ * @uses protocol/findElementsFromElement, protocol/elementClick
  * @type action
  *
  */
 
-export default function selectByIndex (selector, index) {
+export default async function selectByIndex (index) {
     /**
      * negative index check
      */
@@ -37,23 +37,21 @@ export default function selectByIndex (selector, index) {
         throw new Error('Index needs to be 0 or any other positive number')
     }
 
-    return this.element(selector).then(element => {
-        /**
-         * check if element was found and throw error if not
-         */
-        if (!element.value) {
-            throw new Error(`No such element: "${selector}"`)
-        }
+    /**
+    * get option elememnts using xpath
+    */
+    const optionElements = await this.findElementsFromElement(this.elementId, 'css',  '<option>')
 
-        return this.elementIdElements(element.value.ELEMENT, '<option>')
-    }).then((elements) => {
-        if (elements.value.length === 0) {
-            throw new Error(`Select element (${selector}) doesn't contain any option element`)
-        }
-        if (elements.value.length - 1 < index) {
-            throw new Error(`Option with index "${index}" not found. Select element (${selector}) only contains ${elements.value.length} option elements`)
-        }
+    if (optionElements.length === 0) {
+        throw new Error(`Select element doesn't contain any option element`)
+    }
 
-        return this.elementIdClick(elements.value[index].ELEMENT)
-    })
+    if (optionElements.length - 1 < index) {
+        throw new Error(`Option with index "${index}" not found. Select element only contains ${optionElements.length} option elements`)
+    }
+
+    /**
+    * select option
+    */
+    return this.elementClick(Object.values(optionElements[index])[0])
 }

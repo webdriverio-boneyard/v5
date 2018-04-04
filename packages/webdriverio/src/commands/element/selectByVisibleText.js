@@ -29,42 +29,22 @@
  *
  */
 
-
-export default function selectByVisibleText (selector, text) {
+export default async function selectByVisibleText (text) {
     /**
-     * get select element
-     */
-    return this.element(selector).then(element => {
-        /**
-         * check if element was found and throw error if not
-         */
-        if (!element.value) {
-            throw new Error(`No such element: "${selector}"`)
-        }
+    * find option elem using xpath
+    */
+    let formatted = `"${text.trim()}"`
 
-        /**
-         * find option elem using xpath
-         */
-        let formatted = `"${text.trim()}"`
+    if (/"/.test(text)) {
+        // escape quotes
+        formatted = 'concat("' + text.trim().split('"').join('", \'"\', "') + '")'
+    }
 
-        if (/"/.test(text)) {
-            formatted = 'concat("' + text.trim().split('"').join('", \'"\', "') + '")' // escape quotes
-        }
-        /* eslint-disable no-irregular-whitespace */
-        const normalized = `[normalize-space(translate(., ' ', '')) = ${formatted}]`
-        /* eslint-enable no-irregular-whitespace */
-        return this.elementIdElement(element.value.ELEMENT, `./option${normalized}|./optgroup/option${normalized}`)
-    }).then(element => {
-        /**
-         * check if element was found and throw error if not
-         */
-        if (!element.value) {
-            throw new Error(`No such element: "${selector}"`)
-        }
+    const normalized = `[normalize-space(translate(., ' ', '')) = ${formatted}]`
+    const optionElement = await this.findElementFromElement(this.elementId, 'xpath', `./option${normalized}|./optgroup/option${normalized}`)
 
-        /**
-         * select option
-         */
-        return this.elementIdClick(element.value.ELEMENT)
-    })
+    /**
+    * select option
+    */
+    return await this.elementClick(Object.values(optionElement)[0])
 }
