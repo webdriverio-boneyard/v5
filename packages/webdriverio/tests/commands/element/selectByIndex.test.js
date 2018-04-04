@@ -26,4 +26,12 @@ describe('selectByIndex test', () => {
         expect(request.mock.calls[2][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/elements')
         expect(request.mock.calls[3][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-456/click')
     })
+
+    it('should throw an error when index < 0', async () => {
+        try {
+            await elem.selectByIndex(-2)
+        } catch (e) {
+            expect(e.toString()).toBe('Error: Index needs to be 0 or any other positive number')
+        }
+    })
 })
