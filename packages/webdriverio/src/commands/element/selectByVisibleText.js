@@ -21,8 +21,7 @@
     })
  * </example>
  *
- * @alias browser.selectByVisibleText
- * @param {String} selector   select element that contains the options
+ * @alias element.selectByVisibleText
  * @param {String} text       text of option element to get selected
  * @uses protocol/element, protocol/elementIdClick, protocol/elementIdElement
  * @type action

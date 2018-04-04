@@ -21,8 +21,7 @@
     });
  * </example>
  *
- * @alias element.selectByIndex
- * @param {String} selector   select element that contains the options
+ * @alias element.selectByIndexs
  * @param {Number} index      option index
  * @uses protocol/findElementsFromElement, protocol/elementClick
  * @type action
