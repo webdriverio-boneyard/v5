@@ -30,15 +30,11 @@
 
 export default async function selectByVisibleText (text) {
     /**
-    * find option elem using xpath
+    * find option element using xpath
     */
-    let formatted = `"${text.trim()}"`
-
-    if (/"/.test(text)) {
-        // escape quotes
-        formatted = 'concat("' + text.trim().split('"').join('", \'"\', "') + '")'
-    }
-
+    const formatted = /"/.test(text)
+        ? 'concat("' + text.trim().split('"').join('", \'"\', "') + '")'
+        : `"${text.trim()}"`
     const normalized = `[normalize-space(translate(., ' ', '')) = ${formatted}]`
     const optionElement = await this.findElementFromElement(this.elementId, 'xpath', `./option${normalized}|./optgroup/option${normalized}`)
 
