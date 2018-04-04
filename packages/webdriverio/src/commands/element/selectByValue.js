@@ -21,16 +21,15 @@
     });
  * </example>
  *
- * @alias browser.selectByValue
- * @param {String} selector   select element that contains the options
+ * @alias element.selectByValue
  * @param {String} value      value of option element to get selected
- * @uses protocol/element, protocol/elementIdClick, protocol/elementIdElement
+ * @uses protocol/findElementFromElement, protocol/elementClick
  * @type action
  *
  */
 
-export default function selectByValue (selector, value) {
-    return this.selectByAttribute(selector, 'value', value)
+export default function selectByValue (value) {
+    return this.selectByAttribute('value', value)
 }
 
 

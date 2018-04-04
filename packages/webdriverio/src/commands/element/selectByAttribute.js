@@ -24,16 +24,15 @@
     });
  * </example>
  *
- * @alias browser.selectByAttribute
- * @param {String} selector   select element that contains the options
+ * @alias element.selectByAttribute
  * @param {String} attribute  attribute of option element to get selected
  * @param {String} value      value of option element to get selected
- * @uses protocol/element, protocol/elementIdClick, protocol/elementIdElement
+ * @uses protocol/findElementFromElement, protocol/elementClick
  * @type action
  *
  */
 
-export default function selectByAttribute (selector, attribute, value) {
+export default async function selectByAttribute (attribute, value) {
     /**
      * convert value into string
      */
@@ -42,32 +41,13 @@ export default function selectByAttribute (selector, attribute, value) {
     }
 
     /**
-     * get options element by xpath
-     */
-    return this.element(selector).then(element => {
-        /**
-         * check if element was found and throw error if not
-         */
-        if (!element.value) {
-            throw new Error(`No such element: "${selector}"`)
-        }
+    * find option elememnt using xpath
+    */
+    const normalized = `[normalize-space(@${attribute.trim()}) = "${value.trim()}"]`
+    const optionElement = await this.findElementFromElement(this.elementId, 'xpath', `./option${normalized}|./optgroup/option${normalized}`)
 
-        /**
-         * find option elem using xpath
-         */
-        const normalized = `[normalize-space(@${attribute.trim()}) = "${value.trim()}"]`
-        return this.elementIdElement(element.value.ELEMENT, `./option${normalized}|./optgroup/option${normalized}`)
-    }).then(element => {
-        /**
-         * check if element was found and throw error if not
-         */
-        if (!element.value) {
-            throw new Error(`No such element: "${selector}"`)
-        }
-
-        /**
-         * select option
-         */
-        return this.elementIdClick(element.value.ELEMENT)
-    })
+    /**
+    * select option
+    */
+    return await this.elementClick(Object.values(optionElement)[0])
 }
