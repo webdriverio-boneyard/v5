@@ -36,9 +36,9 @@ export default async function selectByAttribute (attribute, value) {
     /**
      * convert value into string
      */
-    if (typeof value === 'number') {
-        value = value.toString()
-    }
+    value = typeof value === 'number'
+        ? value.toString()
+        : value
 
     /**
     * find option elememnt using xpath

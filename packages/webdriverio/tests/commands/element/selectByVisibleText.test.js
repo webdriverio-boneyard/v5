@@ -22,4 +22,12 @@ describe('selectByVisibleText test', () => {
         expect(request.mock.calls[2][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/element')
         expect(request.mock.calls[3][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-sub-elem-321/click')
     })
+
+    it('should select value by visible text with quotes', async () => {
+        await elem.selectByVisibleText('"someValue1"')
+
+        expect(request.mock.calls[1][0].uri.path).toBe('/wd/hub/session/foobar-123/element')
+        expect(request.mock.calls[2][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/element')
+        expect(request.mock.calls[3][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-sub-elem-321/click')
+    })
 })
