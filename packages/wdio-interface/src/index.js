@@ -1,67 +1,47 @@
-process.title = 'WDIO Testrunner';
+import util from 'util'
+import ansiEscapes from 'ansi-escapes'
 
-import blessed from 'blessed'
-
-import { BOX_STYLE } from './constants'
-
-export class WDIOCLIInterface {
+export default class CLInterface {
     constructor () {
-        this.screen = blessed.screen({
-            smartCSR: true,
-            log: process.env.HOME + '/blessed-terminal.log',
-            fullUnicode: true,
-            dockBorders: true,
-            ignoreDockContrast: true
-        })
+        this.i = 0
+        this.stdoutBuffer = []
+        this.stderrBuffer = []
+        this.out = ::process.stdout.write
+        this.err = ::process.stderr.write
 
-        this.runnerWindow = blessed.box({
-            parent: this.screen,
-            label: ' WDIO Testrunner ',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '30%',
-            border: 'line',
-            style: BOX_STYLE
-        })
+        this.clearAll()
 
-        this.logWindow = blessed.box({
-            parent: this.screen,
-            label: ' WebdriverIO Logs ',
-            left: 0,
-            top: '30%-1',
-            width: '50%+2',
-            height: '70%+1',
-            border: 'line',
-            style: BOX_STYLE
-        })
+        /**
+         * don't modify stdout and stderr streams for unit tests
+         */
+        /* istanbul ignore if */
+        if (!process.env.WDIO_TEST) {
+            this.wrapStdio(process.stdout, this.stdoutBuffer)
+            this.wrapStdio(process.stderr, this.stderrBuffer)
+        }
+    }
 
-        this.reporterWindow = blessed.box({
-            parent: this.screen,
-            label: ' Reporter ',
-            left: '50%-1',
-            top: '30%-1',
-            width: '50%+2',
-            height: '70%+1',
-            border: 'line',
-            style: BOX_STYLE
-        })
+    wrapStdio(stream, buffer) {
+        stream.write = chunk => {
+            buffer.push(chunk)
+            return true
+        }
+    }
 
-        this.windows = [this.runnerWindow, this.logWindow, this.reporterWindow]
-        this.windows.forEach((term) => {
-            term.on('title', (title) => {
-                this.screen.title = title;
-                term.setLabel(' ' + title + ' ');
-                this.screen.render();
-            });
-        })
+    clearAll () {
+        this.out(ansiEscapes.clearScreen)
+    }
 
-        this.runnerWindow.focus()
-        this.screen.key('C-c', () => this.screen.destroy())
-        this.screen.program.key('S-tab', () => {
-            this.screen.focusNext();
-            this.screen.render();
-        })
-        this.screen.render()
+    clearLine () {
+        this.out(ansiEscapes.eraseStartLine)
+        this.out(ansiEscapes.cursorLeft)
+    }
+
+    log(...messages) {
+        this.out(util.format.apply(this, messages) + '\n')
+    }
+
+    write (message) {
+        this.out(message)
     }
 }

@@ -1,6 +1,7 @@
 import logger from 'wdio-logger'
 import { ConfigParser, initialisePlugin } from 'wdio-config'
 
+import CLInterface from './interface'
 import { getLauncher, runServiceHook } from './utils'
 
 const log = logger('wdio-cli:Launcher')
@@ -15,9 +16,13 @@ class Launcher {
         const capabilities = this.configParser.getCapabilities()
         const specs = this.configParser.getSpecs()
 
+        this.interface = new CLInterface(config, specs)
+        config.runnerEnv.FORCE_COLOR = this.interface.hasAnsiSupport
+
         const Runner = initialisePlugin(config.runner, 'runner')
-        this.runner = new Runner(configFile, config, capabilities, specs)
+        this.runner = new Runner(configFile, config)
         this.runner.on('end', ::this.endHandler)
+        this.runner.on('message', ::this.interface.onMessage)
 
         this.argv = argv
         this.configFile = configFile
@@ -259,6 +264,7 @@ class Launcher {
             execArgv
         })
 
+        this.interface.emit('job:start', { cid, caps, specs })
         this.runnerStarted++
     }
 
@@ -276,12 +282,14 @@ class Launcher {
 
     /**
      * Close test runner process once all child processes have exited
-     * @param  {Number} cid  Capabilities ID
-     * @param  {Number} childProcessExitCode  exit code of child process
+     * @param  {Number} cid       Capabilities ID
+     * @param  {Number} exitCode  exit code of child process
      */
-    endHandler (cid, childProcessExitCode) {
-        this.exitCode = this.exitCode || childProcessExitCode
-        this.runnerFailed += childProcessExitCode !== 0 ? 1 : 0
+    endHandler ({ cid, exitCode }) {
+        const passed = exitCode === 0
+        this.exitCode = this.exitCode || exitCode
+        this.runnerFailed += !passed ? 1 : 0
+        this.interface.emit('job:end', { cid, passed })
 
         // Update schedule now this process has ended
         if (!this.isMultiremote) {
@@ -296,14 +304,20 @@ class Launcher {
             return
         }
 
-        if (this.exitCode === 0) {
-            return this.resolve(this.exitCode)
+        if (passed) {
+            return process.nextTick(() => {
+                this.interface.updateView()
+                setTimeout(() => this.resolve(this.exitCode), 100)
+            })
         }
 
         /**
          * finish with exit code 1
          */
-        return this.resolve(1)
+        return process.nextTick(() => {
+            this.interface.updateView()
+            setTimeout(() => this.resolve(1), 100)
+        })
     }
 
     /**
