@@ -28,6 +28,7 @@ describe('selectByIndex test', () => {
     })
 
     it('should throw an error when index < 0', async () => {
+        expect.hasAssertions()
         try {
             await elem.selectByIndex(-2)
         } catch (e) {

@@ -41,5 +41,5 @@ export default async function selectByVisibleText (text) {
     /**
     * select option
     */
-    return await this.elementClick(Object.values(optionElement)[0])
+    return this.elementClick(Object.values(optionElement)[0])
 }

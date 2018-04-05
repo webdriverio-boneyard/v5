@@ -49,5 +49,5 @@ export default async function selectByAttribute (attribute, value) {
     /**
     * select option
     */
-    return await this.elementClick(Object.values(optionElement)[0])
+    return this.elementClick(Object.values(optionElement)[0])
 }
