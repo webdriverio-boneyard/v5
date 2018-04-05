@@ -37,7 +37,7 @@ export default async function selectByIndex (index) {
     }
 
     /**
-    * get option elememnts using xpath
+    * get option elememnts using css
     */
     const optionElements = await this.findElementsFromElement(this.elementId, 'css',  '<option>')
 
