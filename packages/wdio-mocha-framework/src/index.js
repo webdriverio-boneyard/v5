@@ -7,9 +7,9 @@ import { runTestInFiberContext, executeHooksWithArgs } from 'wdio-config'
 const log = logger('wdio-mocha-framework')
 
 const INTERFACES = {
-    bdd: ['before', 'beforeEach', 'it', 'after', 'afterEach'],
-    tdd: ['suiteSetup', 'setup', 'test', 'suiteTeardown', 'teardown'],
-    qunit: ['before', 'beforeEach', 'test', 'after', 'afterEach']
+    bdd: ['it', 'before', 'beforeEach', 'after', 'afterEach'],
+    tdd: ['test', 'suiteSetup', 'setup', 'suiteTeardown', 'teardown'],
+    qunit: ['test', 'before', 'beforeEach', 'after', 'afterEach']
 }
 
 /**
@@ -28,6 +28,20 @@ const EVENTS = {
 }
 
 const NOOP = function () {}
+
+/**
+* Extracts the mocha UI type following this convention:
+*  - If the mochaOpts.ui provided doesn't contain a '-' then the full name
+*      is taken as ui type (i.e. 'bdd','tdd','qunit')
+*  - If it contains a '-' then it asumes we are providing a custom ui for
+*      mocha. Then it extracts the text after the last '-' (ignoring .js if
+*      provided) as the interface type. (i.e. strong-bdd in
+*      https://github.com/strongloop/strong-mocha-interfaces)
+*/
+
+const MOCHA_UI_TYPE_EXTRACTOR = /^(?:.*-)?([^-.]+)(?:.js)?$/
+
+const DEFAULT_INTERFACE_TYPE = 'bdd'
 
 /**
  * Mocha runner
@@ -64,8 +78,10 @@ class MochaAdapter {
     async run () {
         let {mochaOpts} = this.config
 
-        if (typeof mochaOpts.ui !== 'string' || !INTERFACES[mochaOpts.ui]) {
-            mochaOpts.ui = 'bdd'
+        let match = MOCHA_UI_TYPE_EXTRACTOR.exec(mochaOpts.ui)
+        let type = match && match[1]
+        if (!INTERFACES[type]) {
+            type = DEFAULT_INTERFACE_TYPE
         }
 
         const mocha = new Mocha(mochaOpts)
@@ -79,8 +95,8 @@ class MochaAdapter {
                 context, file, mocha, options: mochaOpts
             })
 
-            INTERFACES[mochaOpts.ui].forEach((fnName) => {
-                let testCommand = INTERFACES[mochaOpts.ui][2]
+            INTERFACES[type].forEach((fnName) => {
+                let testCommand = INTERFACES[type][0]
 
                 runTestInFiberContext(
                     testCommand,
