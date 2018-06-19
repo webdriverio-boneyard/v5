@@ -19,7 +19,7 @@ export const elementErrorHandler = (fn) => (commandName, commandFn) => {
         /**
          * wait on element if:
          *  - elementId couldn't be fetched in the first place
-         *  - command is not explicit wait command for existance or displayedness
+         *  - command is not explicit wait command for existence or displayedness
          */
         if (!this.elementId && !commandName.match(/(wait(Until|ForVisible|ForExist)|isExisting)/)) {
             log.debug(
@@ -29,7 +29,7 @@ export const elementErrorHandler = (fn) => (commandName, commandFn) => {
 
             return fn(commandName, () => {
                 /**
-                 * create new promise so we can apply a custom error message in cases waitForExist fails
+                 * create new promise so we can apply a custom error message in case waitForExist fails
                  */
                 return new Promise((resolve, reject) => this.waitForExist().then(resolve, reject)).then(
                     /**
@@ -42,12 +42,48 @@ export const elementErrorHandler = (fn) => (commandName, commandFn) => {
                         })
                     },
                     /**
-                     * if waitForExist failes throw custom error
+                     * if waitForExist fails throw custom error
                      */
                     () => {
                         throw new Error(`Can't call ${commandName} on element with selector "${this.selector}" because element wasn't found`)
                     }
                 )
+            }).apply(this)
+        }
+
+        /**
+         * apply workarounds for unclickable elements if:
+         *  - elementId can be fetched
+         *  - command to click element would return "not clickable" error
+         */
+        if (this.elementId && commandName.match(/click/)) {
+            /**
+             * if element is not within viewport, scroll to it
+             */
+            if(!this.isVisibleWithinViewPort()) {
+                this.scrollIntoView()
+            }
+
+            return fn(commandName, () => {
+                /**
+                 * create new promise so we can apply a custom error message in case element never becomes clickable
+                 */
+                return new Promise((resolve, reject) => this.waitUntil(() => {
+                    return (this.isVisible() && this.isEnabled())
+                }).then(resolve, reject).then(
+                    /**
+                     * if element became clickable pass through original click command
+                     */
+                    () => {
+                        return fn(commandName, commandFn).apply(this, args)
+                    },
+                    /**
+                     * if element never became clickable, throw custom error
+                     */
+                    () => {
+                        throw new Error(`Can't call ${commandName} on element with selector "${this.selector}" because element is not visible and/or not enabled`)
+                    }
+                ))
             }).apply(this)
         }
 
