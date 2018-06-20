@@ -18,9 +18,7 @@ const log = logger('wdio-mocha-framework')
 *      provided) as the interface type. (i.e. strong-bdd in
 *      https://github.com/strongloop/strong-mocha-interfaces)
 */
-
 const MOCHA_UI_TYPE_EXTRACTOR = /^(?:.*-)?([^-.]+)(?:.js)?$/
-
 const DEFAULT_INTERFACE_TYPE = 'bdd'
 
 /**
@@ -47,13 +45,6 @@ class MochaAdapter {
 
     async run () {
         const { mochaOpts } = this.config
-
-        let match = MOCHA_UI_TYPE_EXTRACTOR.exec(mochaOpts.ui)
-        let type = match && match[1]
-        if (!INTERFACES[type]) {
-            type = DEFAULT_INTERFACE_TYPE
-        }
-
         const mocha = this.mocha = new Mocha(mochaOpts)
         mocha.loadFiles()
         mocha.reporter(NOOP)
@@ -103,12 +94,14 @@ class MochaAdapter {
     }
 
     preRequire (context, file, mocha) {
-
         const options = this.config.mochaOpts
 
+        const match = MOCHA_UI_TYPE_EXTRACTOR.exec(options.ui)
+        const type = (match && INTERFACES[match[1]] && match[1]) || DEFAULT_INTERFACE_TYPE
+
         this.options(options, { context, file, mocha, options })
-        INTERFACES[options.ui].forEach((fnName) => {
-            let testCommand = INTERFACES[options.ui][0]
+        INTERFACES[type].forEach((fnName) => {
+            let testCommand = INTERFACES[type][0]
 
             runTestInFiberContext(
                 [testCommand, testCommand + '.only'],
