@@ -4,30 +4,10 @@ import Mocha from 'mocha'
 import logger from 'wdio-logger'
 import { runTestInFiberContext, executeHooksWithArgs } from 'wdio-config'
 
+import { loadModule } from './utils'
+import { INTERFACES, EVENTS, NOOP } from './constants'
+
 const log = logger('wdio-mocha-framework')
-
-const INTERFACES = {
-    bdd: ['it', 'before', 'beforeEach', 'after', 'afterEach'],
-    tdd: ['test', 'suiteSetup', 'setup', 'suiteTeardown', 'teardown'],
-    qunit: ['test', 'before', 'beforeEach', 'after', 'afterEach']
-}
-
-/**
- * to map Mocha events to WDIO events
- */
-const EVENTS = {
-    'suite': 'suite:start',
-    'suite end': 'suite:end',
-    'test': 'test:start',
-    'test end': 'test:end',
-    'hook': 'hook:start',
-    'hook end': 'hook:end',
-    'pass': 'test:pass',
-    'fail': 'test:fail',
-    'pending': 'test:pending'
-}
-
-const NOOP = function () {}
 
 /**
 * Extracts the mocha UI type following this convention:
@@ -65,6 +45,53 @@ class MochaAdapter {
         }
     }
 
+    async run () {
+        const { mochaOpts } = this.config
+
+        let match = MOCHA_UI_TYPE_EXTRACTOR.exec(mochaOpts.ui)
+        let type = match && match[1]
+        if (!INTERFACES[type]) {
+            type = DEFAULT_INTERFACE_TYPE
+        }
+
+        const mocha = this.mocha = new Mocha(mochaOpts)
+        mocha.loadFiles()
+        mocha.reporter(NOOP)
+        mocha.fullTrace()
+
+        this.specs.forEach((spec) => mocha.addFile(spec))
+        mocha.suite.on('pre-require', ::this.preRequire)
+
+        let runtimeError
+        await executeHooksWithArgs(this.config.before, [this.capabilities, this.specs])
+        const result = await new Promise((resolve) => {
+            try {
+                this.runner = mocha.run(resolve)
+            } catch (e) {
+                runtimeError = e
+                return resolve(1)
+            }
+
+            Object.keys(EVENTS).forEach((e) =>
+                this.runner.on(e, this.emit.bind(this, EVENTS[e])))
+
+            this.runner.suite.beforeAll(this.wrapHook('beforeSuite'))
+            this.runner.suite.beforeEach(this.wrapHook('beforeTest'))
+            this.runner.suite.afterEach(this.wrapHook('afterTest'))
+            this.runner.suite.afterAll(this.wrapHook('afterSuite'))
+        })
+        await executeHooksWithArgs(this.config.after, [runtimeError || result, this.capabilities, this.specs])
+
+        /**
+         * in case the spec has a runtime error throw after the wdio hook
+         */
+        if (runtimeError) {
+            throw runtimeError
+        }
+
+        return result
+    }
+
     options (options, context) {
         let {require = [], compilers = []} = options
 
@@ -75,52 +102,21 @@ class MochaAdapter {
         this.requireExternalModules([...compilers, ...require], context)
     }
 
-    async run () {
-        let {mochaOpts} = this.config
+    preRequire (context, file, mocha) {
 
-        let match = MOCHA_UI_TYPE_EXTRACTOR.exec(mochaOpts.ui)
-        let type = match && match[1]
-        if (!INTERFACES[type]) {
-            type = DEFAULT_INTERFACE_TYPE
-        }
+        const options = this.config.mochaOpts
 
-        const mocha = new Mocha(mochaOpts)
-        mocha.loadFiles()
-        mocha.reporter(NOOP)
-        mocha.fullTrace()
-        this.specs.forEach((spec) => mocha.addFile(spec))
+        this.options(options, { context, file, mocha, options })
+        INTERFACES[options.ui].forEach((fnName) => {
+            let testCommand = INTERFACES[options.ui][0]
 
-        mocha.suite.on('pre-require', (context, file, mocha) => {
-            this.options(mochaOpts, {
-                context, file, mocha, options: mochaOpts
-            })
-
-            INTERFACES[type].forEach((fnName) => {
-                let testCommand = INTERFACES[type][0]
-
-                runTestInFiberContext(
-                    testCommand,
-                    this.config.beforeHook,
-                    this.config.afterHook,
-                    fnName
-                )
-            })
+            runTestInFiberContext(
+                [testCommand, testCommand + '.only'],
+                this.config.beforeHook,
+                this.config.afterHook,
+                fnName
+            )
         })
-
-        await executeHooksWithArgs(this.config.before, [this.capabilities, this.specs])
-        let result = await new Promise((resolve) => {
-            this.runner = mocha.run(resolve)
-
-            Object.keys(EVENTS).forEach((e) =>
-                this.runner.on(e, this.emit.bind(this, EVENTS[e])))
-
-            this.runner.suite.beforeAll(this.wrapHook('beforeSuite'))
-            this.runner.suite.beforeEach(this.wrapHook('beforeTest'))
-            this.runner.suite.afterEach(this.wrapHook('afterTest'))
-            this.runner.suite.afterAll(this.wrapHook('afterSuite'))
-        })
-        await executeHooksWithArgs(this.config.after, [result, this.capabilities, this.specs])
-        return result
     }
 
     /**
@@ -131,7 +127,7 @@ class MochaAdapter {
             this.config[hookName],
             this.prepareMessage(hookName)
         ).catch((e) => {
-            log.error(`Error in ${hookName} hook (ignoring)`, e.stack)
+            log.error(`Error in ${hookName} hook: ${e.stack.slice(7)}`)
         })
     }
 
@@ -149,7 +145,7 @@ class MochaAdapter {
             break
         }
 
-        params.error = this.lastError
+        params.err = this.lastError
         delete this.lastError
         return this.formatMessage(params)
     }
@@ -204,15 +200,17 @@ class MochaAdapter {
 
     requireExternalModules (modules, context) {
         modules.forEach(module => {
-            if (module) {
-                module = module.replace(/.*:/, '')
-
-                if (module.substr(0, 1) === '.') {
-                    module = path.join(process.cwd(), module)
-                }
-
-                this.load(module, context)
+            if (!module) {
+                return
             }
+
+            module = module.replace(/.*:/, '')
+
+            if (module.substr(0, 1) === '.') {
+                module = path.join(process.cwd(), module)
+            }
+
+            loadModule(module, context)
         })
     }
 
@@ -297,24 +295,12 @@ class MochaAdapter {
 
         return uid
     }
-
-    load (name, context) {
-        try {
-            module.context = context
-            require(name)
-        } catch (e) {
-            throw new Error(`Module ${name} can't get loaded. Are you sure you have installed it?\n` +
-                            `Note: if you've installed WebdriverIO globally you need to install ` +
-                            `these external modules globally too!`)
-        }
-    }
 }
 
-const _MochaAdapter = MochaAdapter
 const adapterFactory = {}
 
 adapterFactory.run = async function (...args) {
-    const adapter = new _MochaAdapter(...args)
+    const adapter = new MochaAdapter(...args)
     const result = await adapter.run()
     return result
 }
