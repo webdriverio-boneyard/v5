@@ -57,33 +57,39 @@ export const elementErrorHandler = (fn) => (commandName, commandFn) => {
          *  - command to click element would return "not clickable" error
          */
         if (this.elementId && commandName.match(/click/)) {
-            /**
-             * if element is not within viewport, scroll to it
-             */
-            if(!this.isVisibleWithinViewPort()) {
-                this.scrollIntoView()
-            }
-
             return fn(commandName, () => {
-                /**
-                 * create new promise so we can apply a custom error message in case element never becomes clickable
-                 */
-                return new Promise((resolve, reject) => this.waitUntil(() => {
-                    return (this.isVisible() && this.isEnabled())
-                }).then(resolve, reject).then(
-                    /**
-                     * if element became clickable pass through original click command
-                     */
+                return new Promise((resolve, reject) => this.waitForExist().then(resolve, reject)).then(
                     () => {
-                        return fn(commandName, commandFn).apply(this, args)
+                        /**
+                         * if element is not within viewport, scroll to it
+                         */
+                        if (!this.isDisplayedInViewport()) {
+                            this.scrollIntoView().then(() => {
+                                /**
+                                 * Wait for element to be displayed and enabled before passing along click command
+                                 */
+                                this.waitUntil(() => {
+                                    return (this.isDisplayed() && this.isEnabled())
+                                })
+                                return fn(commandName, commandFn).apply(this, args)
+                            })
+                        } else {
+                            /**
+                             * Wait for element to be displayed and enabled before passing along click command
+                             */
+                            this.waitUntil(() => {
+                                return (this.isDisplayed() && this.isEnabled())
+                            })
+                            return fn(commandName, commandFn).apply(this, args)
+                        }
                     },
                     /**
-                     * if element never became clickable, throw custom error
+                     * If element never becomes clickable, pass along custom error message
                      */
                     () => {
                         throw new Error(`Can't call ${commandName} on element with selector "${this.selector}" because element is not visible and/or not enabled`)
                     }
-                ))
+                )
             }).apply(this)
         }
 
