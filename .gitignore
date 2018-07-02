@@ -62,3 +62,7 @@ typings/
 !.eslintrc.js
 package-lock.json
 .DS_Store
+test/site/platforms
+test/site/plugins
+test/site/www/components
+.vscode/launch.json
