@@ -13,12 +13,8 @@ export default class ConciseReporter extends WDIOReporter {
         this.suiteUids = []
 
         this.suites = []
-        this.suiteIndents = {}
-        this.defaultTestIndent = '   '
         this.stateCounts = {
-            passed : 0,
-            failed : 0,
-            skipped : 0
+            failed : 0
         }
 
         this.chalk = chalk
@@ -26,24 +22,14 @@ export default class ConciseReporter extends WDIOReporter {
 
     onSuiteStart (suite) {
         this.suiteUids.push(suite.uid)
-        this.suiteIndents[suite.uid] = ++this.indents
     }
 
     onSuiteEnd (suite) {
-        this.indents--
         this.suites.push(suite)
-    }
-
-    onTestPass () {
-        this.stateCounts.passed++
     }
 
     onTestFail () {
         this.stateCounts.failed++
-    }
-
-    onTestSkip () {
-        this.stateCounts.skipped++
     }
 
     onRunnerEnd (runner) {
@@ -51,13 +37,13 @@ export default class ConciseReporter extends WDIOReporter {
     }
 
     /**
-     * Print the report to the screen
+     * Print the Concise report to the screen
      */
     printReport(runner) {
         const header = this.chalk.yellow('========= Your concise report ==========')
 
         const output = [
-            ...this.getHeaderDisplay(runner),
+            this.getEnviromentCombo(runner.capabilities),
             this.getCountDisplay(),
             ...this.getFailureDisplay()
         ]
@@ -67,33 +53,15 @@ export default class ConciseReporter extends WDIOReporter {
     }
 
     /**
-     * Get the header display for the report
-     * @param  {Object} runner Runner data
-     * @return {Array}         Header data
-     */
-    getHeaderDisplay(runner) {
-        const combo = this.getEnviromentCombo(runner.capabilities).trim()
-
-        // Spec file name and enviroment information
-        const output = [
-            `${combo}`
-        ]
-
-        return output
-    }
-
-    /**
      * Get the display for failing tests
      * @return {String} Count display
      */
     getCountDisplay () {
         const failedTestsCount = this.stateCounts.failed
 
-        if(failedTestsCount > 0) {
-            return `Test${failedTestsCount > 1 ? 's' : ''} failed (${failedTestsCount}):`
-        } else {
-            return 'All went well !!'
-        }
+        return failedTestsCount > 0
+            ? `Test${failedTestsCount > 1 ? 's' : ''} failed (${failedTestsCount}):`
+            : 'All went well !!'
     }
 
     /**
@@ -102,21 +70,16 @@ export default class ConciseReporter extends WDIOReporter {
      */
     getFailureDisplay () {
         const output = []
-        const suites = this.getOrderedSuites()
 
-        for (const suite of suites) {
-            for (const test of suite.tests) {
-                if (test.state !== 'failed') {
-                    continue
-                }
-
+        this.getOrderedSuites().map(suite => suite.tests.map(test => {
+            if (test.state === 'failed') {
                 // If we get here then there is a failed test
                 output.push(
-                    `    Fail : ${this.chalk.red(test.title)}`,
-                    `        ${test.error.type} : ${this.chalk.yellow(test.error.message)}`
+                    `  Fail : ${this.chalk.red(test.title)}`,
+                    `    ${test.error.type} : ${this.chalk.yellow(test.error.message)}`
                 )
             }
-        }
+        }))
 
         return output
     }
