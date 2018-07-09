@@ -116,7 +116,7 @@ export default class ConciseReporter extends WDIOReporter {
             const program = (caps.app || '').replace('sauce-storage:', '') || caps.browserName
             const executing = program ? `executing ${program}` : ''
 
-            return `${device} on ${platform} ${version} ${executing}`
+            return `${device} on ${platform} ${version} ${executing}`.trim()
         }
 
         return browser
