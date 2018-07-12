@@ -13,11 +13,12 @@ describe('click test', () => {
             }
         })
         elem = await browser.$('#foo')
+        request.mockClear()
     })
 
     it('should allow to click on an element', async () => {
         await elem.click()
-        expect(request.mock.calls[2][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/click')
+        expect(request.mock.calls[4][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/click')
     })
 
     afterEach(() => {

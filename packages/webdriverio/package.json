@@ -59,5 +59,8 @@
     "wdio-config": "^5.0.0-alpha.9",
     "wdio-logger": "^5.0.0-alpha.9",
     "webdriver": "^5.0.0-alpha.9"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
   }
 }
