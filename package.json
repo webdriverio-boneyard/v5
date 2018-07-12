@@ -21,7 +21,6 @@
     "watch:pkg": "lerna exec 'npm run compile -- --watch' --scope"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
     "babel-core": "^6.24.1",
     "babel-eslint": "^8.0.3",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -39,7 +38,8 @@
     "lerna": "^2.5.1",
     "np": "^2.18.2",
     "npm-run-all": "^4.0.2",
-    "shelljs": "^0.8.1"
+    "shelljs": "^0.8.1",
+    "wdio-static-server-service": "^1.0.1"
   },
   "jest": {
     "testMatch": [

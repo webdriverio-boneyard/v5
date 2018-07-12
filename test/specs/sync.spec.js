@@ -2,7 +2,9 @@ const assert = require('assert')
 
 describe('My awesome feature', () => {
     it('should can do something', () => {
-        browser.url('http://google.com')
+        browser.url('/')
+
+        browser.pause(5000)
 
         const title = driver.getTitle()
         assert.equal(title, 'Google')

@@ -56,43 +56,39 @@ export const elementErrorHandler = (fn) => (commandName, commandFn) => {
          *  - elementId can be fetched
          *  - command to click element would return "not clickable" error
          */
-        if (this.elementId && commandName.match(/click/)) {
-            return fn(commandName, () => {
-                return new Promise((resolve, reject) => this.waitForExist().then(resolve, reject)).then(
-                    () => {
+        if (this.elementId && commandName === 'click') {
+            return fn(commandName, async () => {
+                try {
+                    await this.waitForExist()
+                    /**
+                     * if element is not within viewport, scroll to it
+                     */
+                    if (!this.isDisplayedInViewport()) {
+                        await this.scrollIntoView()
                         /**
-                         * if element is not within viewport, scroll to it
+                         * Wait for element to be displayed and enabled before passing along click command
                          */
-                        if (!this.isDisplayedInViewport()) {
-                            this.scrollIntoView().then(() => {
-                                /**
-                                 * Wait for element to be displayed and enabled before passing along click command
-                                 */
-                                this.waitUntil(() => {
-                                    return (this.isDisplayed() && this.isEnabled())
-                                })
-                                return fn(commandName, commandFn).apply(this, args)
-                            })
-                        } else {
-                            /**
-                             * Wait for element to be displayed and enabled before passing along click command
-                             */
-                            this.waitUntil(() => {
-                                return (this.isDisplayed() && this.isEnabled())
-                            })
-                            return fn(commandName, commandFn).apply(this, args)
-                        }
-                    },
+                        this.waitUntil(() => {
+                            return (this.isDisplayed() && this.isEnabled())
+                        })
+                        return fn(commandName, commandFn).apply(this, args)
+                    } else {
+                        /**
+                         * Wait for element to be displayed and enabled before passing along click command
+                         */
+                        this.waitUntil(() => {
+                            return (this.isDisplayed() && this.isEnabled())
+                        })
+                        return fn(commandName, commandFn).apply(this, args)
+                    }
                     /**
                      * If element never becomes clickable, pass along custom error message
                      */
-                    () => {
-                        throw new Error(`Can't call ${commandName} on element with selector "${this.selector}" because element is not visible and/or not enabled`)
-                    }
-                )
+                } catch (err) {
+                    throw new Error(`Can't call ${commandName} on element with selector "${this.selector}" because element is not visible and/or not enabled`)
+                }
             }).apply(this)
         }
-
         return fn(commandName, commandFn).apply(this, args)
     }
 }
