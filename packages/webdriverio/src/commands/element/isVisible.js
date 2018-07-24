@@ -9,7 +9,7 @@
     <div id="notInViewport" style="position:absolute; left: 9999999"></div>
     <div id="zeroOpacity" style="opacity: 0"></div>
     :isVisible.js
-    it('should detect if an element is visible', function () {
+    it('should detect if an element is visible', () => {
         let elem = $('#notDisplayed');
         let isVisible = elem.isVisible();
         console.log(isVisible); // outputs: false
@@ -17,7 +17,7 @@
         elem = $('#notVisible');
         isVisible = elem.isVisible();
         console.log(isVisible); // outputs: false
-        
+
         elem = $('#notExisting');
         isVisible = elem.isVisible();
         console.log(isVisible); // outputs: false
@@ -39,6 +39,6 @@
  *
  */
 
-export default function isDisplayed() {
+export default function isVisible() {
     return this.isElementDisplayed(this.elementId)
 }
