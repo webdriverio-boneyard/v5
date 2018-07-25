@@ -1,7 +1,7 @@
 import request from 'request'
 import { remote } from '../../../src'
 
-describe('isDisplayed test', () => {
+describe('isVisible test', () => {
     let browser
     let elem
 
@@ -15,8 +15,8 @@ describe('isDisplayed test', () => {
         elem = await browser.$('#foo')
     })
 
-    it('should allow to check if element is displayed', async () => {
-        await elem.isDisplayed()
+    it('should allow to check if element is visible', async () => {
+        await elem.isVisible()
         expect(request.mock.calls[2][0].uri.path).toBe('/wd/hub/session/foobar-123/element/some-elem-123/displayed')
     })
 
