@@ -1,9 +1,9 @@
-import process from 'process'
 import {events, stepStatuses} from "./constants";
+import {tellReporter} from "./utils";
 
 /**
  * Assign feature to test
- * @param {(string|string[])} featureName - feature name or an array of names
+ * @param {(string)} featureName - feature name or an array of names
  */
 export const addFeature = (featureName) => {
     tellReporter(events.addFeature, {featureName})
@@ -61,7 +61,7 @@ export const addAttachment = (name, content, type = 'text/plain') => {
  * @param {string} [status='passed'] - step status
  */
 export const addStep = (title, {content, name = 'attachment'}, status = stepStatuses.PASSED) => {
-    if ((status in stepStatuses)) {
+    if (!Object.values(stepStatuses).includes(status)) {
         throw new Error(`Step status must be ${Object.values(stepStatuses).join(' or ')}. You tried to set "${status}"`)
     }
 
@@ -74,14 +74,4 @@ export const addStep = (title, {content, name = 'attachment'}, status = stepStat
         status
     }
     tellReporter(events.addStep, {step})
-}
-
-/**
- * Call reporter
- * @param {string} event  - event name
- * @param {Object} msg - event payload
- * @private
- */
-const tellReporter = (event, msg = {}) => {
-    process.emit(event, msg)
 }

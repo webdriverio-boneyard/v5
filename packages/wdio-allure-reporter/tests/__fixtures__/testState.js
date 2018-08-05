@@ -11,15 +11,15 @@ const testState = {
     scenarioName: 'story foo bar'
 };
 
-export function testStart(cid = '0-0') {
-    return Object.assign(testState, {cid})
+export function testStart() {
+    return testState
 }
 
-export function testPassed(cid = '0-0') {
-    return Object.assign(testState, {cid, state: 'passed', end: '2018-05-14T15:17:21.631Z', _duration: 2730})
+export function testPassed() {
+    return Object.assign(testState, {state: 'passed', end: '2018-05-14T15:17:21.631Z', _duration: 2730})
 }
 
-export function testFailed(cid = '0-0') {
+export function testFailed() {
     const error =
         {
             message: 'foo == bar',
@@ -29,9 +29,9 @@ export function testFailed(cid = '0-0') {
             expected: 'foo',
             actual: 'bar'
         }
-    return Object.assign(testState, {cid, error, state: 'failed', end: '2018-05-14T15:17:21.631Z', _duration: 2730})
+    return Object.assign(testState, {error, state: 'failed', end: '2018-05-14T15:17:21.631Z', _duration: 2730})
 }
 
-export function testPending(cid = '0-0') {
-    return Object.assign(testState, {cid, state: 'pending', end: '2018-05-14T15:17:21.631Z', _duration: 0})
+export function testPending() {
+    return Object.assign(testState, {state: 'pending', end: '2018-05-14T15:17:21.631Z', _duration: 0})
 }

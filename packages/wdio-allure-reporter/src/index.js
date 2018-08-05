@@ -134,7 +134,7 @@ class AllureReporter extends WDIOReporter {
 
     addStory({storyName}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         const test = this.allure.getCurrentTest()
@@ -143,7 +143,7 @@ class AllureReporter extends WDIOReporter {
 
     addFeature({featureName}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         const test = this.allure.getCurrentTest()
@@ -152,7 +152,7 @@ class AllureReporter extends WDIOReporter {
 
     addSeverity({severity}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         const test = this.allure.getCurrentTest()
@@ -161,7 +161,7 @@ class AllureReporter extends WDIOReporter {
 
     addEnvironment({name, value}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         const test = this.allure.getCurrentTest()
@@ -170,7 +170,7 @@ class AllureReporter extends WDIOReporter {
 
     addDescription({description, type}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         const test = this.allure.getCurrentTest()
@@ -178,8 +178,8 @@ class AllureReporter extends WDIOReporter {
     }
 
     addAttachment({name, content, type = 'text/plain'}) {
-        if (!content) {
-            return
+        if (!this.isAnyTestRunning()) {
+            return false;
         }
 
         if (type === 'application/json') {
@@ -191,7 +191,7 @@ class AllureReporter extends WDIOReporter {
 
     addStep({step}) {
         if (!this.isAnyTestRunning()) {
-            return
+            return false;
         }
 
         this.allure.startStep(step.title)
@@ -205,8 +205,9 @@ class AllureReporter extends WDIOReporter {
         return this.allure.getCurrentSuite() && this.allure.getCurrentTest()
     }
 
-    isScreenshotCommand = (command) => {
-        return command.endpoint.match(/\/session\/[^/]*\/screenshot/)
+    isScreenshotCommand(command){
+        const isScrenshotEndpoint = /\/session\/[^/]*\/screenshot/
+        return isScrenshotEndpoint.test(command.endpoint)
     }
 
     dumpJSON(name, json) {

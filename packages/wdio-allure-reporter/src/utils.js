@@ -1,5 +1,5 @@
+import process from 'process'
 import {testStatuses} from './constants'
-
 /**
  * Get allure test status by TestStat object
  * @param test {Object} - TestStat object
@@ -34,3 +34,13 @@ export const isEmpty = (object) => !object || Object.keys(object).length === 0
  * @private
  */
 export const ignoredHooks = title => ['"before all" hook', '"after all" hook'].some(hook => title.includes(hook))
+
+/**
+ * Call reporter
+ * @param {string} event  - event name
+ * @param {Object} msg - event payload
+ * @private
+ */
+export const tellReporter = (event, msg = {}) => {
+    process.emit(event, msg)
+}

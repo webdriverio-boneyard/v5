@@ -11,11 +11,11 @@ const suite = {
     suites: []
 };
 
-export function suiteStart(cid= '0-0') {
-    return Object.assign(suite, {cid})
+export function suiteStart() {
+    return Object.assign(suite)
 }
 
-export function suiteEnd(cid= '0-0') {
-    return Object.assign(suite, {cid, end: '2018-05-14T15:17:21.631Z', _duration: 2730})
+export function suiteEnd() {
+    return Object.assign(suite, {end: '2018-05-14T15:17:21.631Z', _duration: 2730})
 }
 

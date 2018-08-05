@@ -9,11 +9,11 @@ const runner = {
     specs: ['/tmp/user/spec.js']
 };
 
-export function runnerStart(cid = '0-0') {
-    return Object.assign(runner, {cid})
+export function runnerStart() {
+    return Object.assign(runner)
 }
 
-export function runnerEnd(cid = '0-0') {
-    return Object.assign(runner, {cid, end: '2018-05-14T15:17:21.631Z', failures: 0, _duration: 2730})
+export function runnerEnd() {
+    return Object.assign(runner, { end: '2018-05-14T15:17:21.631Z', failures: 0, _duration: 2730})
 }
 
