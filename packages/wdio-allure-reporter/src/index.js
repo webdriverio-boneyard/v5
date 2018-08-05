@@ -7,7 +7,6 @@ import {events, testStatuses} from './constants'
 class AllureReporter extends WDIOReporter {
     constructor(options) {
         super(options)
-        this.runner = {}
         this.config = {}
         this.allure = new Allure()
         this.allure.setOptions({targetDir: options.outputDir || 'allure-results'})
@@ -25,7 +24,6 @@ class AllureReporter extends WDIOReporter {
     }
 
     onRunnerStart(runner) {
-        this.runner = runner
         this.config = runner.config
         this.isMultiremote = runner.isMultiremote
     }
@@ -43,17 +41,9 @@ class AllureReporter extends WDIOReporter {
     onTestStart(test) {
         this.allure.startCase(test.title)
 
-        const runner = this.runner;
         const currentTest = this.allure.getCurrentTest()
 
-        currentTest.addParameter('argument', 'browser', runner.config.capabilities.browserName || 'unknown')
-        currentTest.addParameter('environment-variable', 'capabilities', JSON.stringify(runner.capabilities))
-        currentTest.addParameter('environment-variable', 'spec files', JSON.stringify(runner.specs))
-
-        if (test.featureName && test.scenarioName) {
-            currentTest.addLabel('feature', test.featureName)
-            currentTest.addLabel('story', test.scenarioName)
-        }
+        currentTest.addParameter('argument', 'browser', this.config.capabilities.browserName || 'unknown')
 
         // Allure analytics labels. See https://github.com/allure-framework/allure2/blob/master/Analytics.md
         currentTest.addLabel('language', 'javascript')
