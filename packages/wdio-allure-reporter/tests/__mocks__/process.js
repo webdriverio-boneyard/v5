@@ -1,1 +1,1 @@
-export default {emit: jest.fn()};
+export default {emit: jest.fn()}

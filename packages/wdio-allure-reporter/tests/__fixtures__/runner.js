@@ -7,7 +7,7 @@ const runner = {
     sanitizedCapabilities: 'chrome.66_0_3359_170.linux',
     config: {capabilities: {browserName: 'chrome'}},
     specs: ['/tmp/user/spec.js']
-};
+}
 
 export function runnerStart() {
     return Object.assign(runner)

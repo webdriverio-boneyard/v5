@@ -5,7 +5,7 @@ import cheerio from 'cheerio'
 
 export function getResults (resultsDir) {
     return getResultFiles(resultsDir, 'xml').map((file) => {
-        const fileContent = fs.readFileSync(path.join(resultsDir, file), 'utf-8');
+        const fileContent = fs.readFileSync(path.join(resultsDir, file), 'utf-8')
         return cheerio.load(fileContent)
     })
 }

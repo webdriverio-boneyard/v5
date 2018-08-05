@@ -1,7 +1,7 @@
 import WDIOReporter from 'wdio-reporter'
-import Allure from 'allure-js-commons';
+import Allure from 'allure-js-commons'
 import Step from 'allure-js-commons/beans/step'
-import {getTestStatus, ignoredHooks, isEmpty} from './utils';
+import {getTestStatus, ignoredHooks, isEmpty} from './utils'
 import {events, testStatuses} from './constants'
 
 class AllureReporter extends WDIOReporter {
@@ -98,7 +98,7 @@ class AllureReporter extends WDIOReporter {
             return
         }
 
-        const {disableWebdriverStepsReporting, disableWebdriverScreenshotsReporting} = this.options;
+        const {disableWebdriverStepsReporting, disableWebdriverScreenshotsReporting} = this.options
         if (this.isScreenshotCommand(command) && command.result.value) {
             if (!disableWebdriverScreenshotsReporting) {
                 this.allure.addAttachment('Screenshot', Buffer.from(command.result.value, 'base64'))
@@ -134,7 +134,7 @@ class AllureReporter extends WDIOReporter {
 
     addStory({storyName}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         const test = this.allure.getCurrentTest()
@@ -143,7 +143,7 @@ class AllureReporter extends WDIOReporter {
 
     addFeature({featureName}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         const test = this.allure.getCurrentTest()
@@ -152,7 +152,7 @@ class AllureReporter extends WDIOReporter {
 
     addSeverity({severity}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         const test = this.allure.getCurrentTest()
@@ -161,7 +161,7 @@ class AllureReporter extends WDIOReporter {
 
     addEnvironment({name, value}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         const test = this.allure.getCurrentTest()
@@ -170,7 +170,7 @@ class AllureReporter extends WDIOReporter {
 
     addDescription({description, type}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         const test = this.allure.getCurrentTest()
@@ -179,7 +179,7 @@ class AllureReporter extends WDIOReporter {
 
     addAttachment({name, content, type = 'text/plain'}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         if (type === 'application/json') {
@@ -191,7 +191,7 @@ class AllureReporter extends WDIOReporter {
 
     addStep({step}) {
         if (!this.isAnyTestRunning()) {
-            return false;
+            return false
         }
 
         this.allure.startStep(step.title)

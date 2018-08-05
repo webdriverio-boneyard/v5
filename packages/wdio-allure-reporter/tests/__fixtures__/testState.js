@@ -9,7 +9,7 @@ const testState = {
     state: 'pending',
     featureName: 'feature foo bar',
     scenarioName: 'story foo bar'
-};
+}
 
 export function testStart() {
     return testState

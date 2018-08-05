@@ -2,7 +2,7 @@ import process from 'process'
 import {getTestStatus, ignoredHooks, isEmpty, tellReporter} from '../src/utils'
 import {testStatuses} from '../src/constants'
 
-jest.mock('process');
+jest.mock('process')
 
 describe('utils#getTestStatus', () => {
     it('return  status for jasmine', () => {
@@ -32,7 +32,7 @@ describe('utils#getTestStatus', () => {
         const test = {error: {stack: 'MyError stack trace'}}
         expect(getTestStatus(test, config)).toEqual(testStatuses.BROKEN)
     })
-});
+})
 
 describe('utils', () => {
     it('ignoredHook filter hook by title', () => {
@@ -53,5 +53,5 @@ describe('utils', () => {
         expect(process.emit).toHaveBeenCalledTimes(1)
         expect(process.emit).toHaveBeenCalledWith('foo', {bar: 'baz'})
     })
-});
+})
 

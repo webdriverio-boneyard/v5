@@ -1,5 +1,5 @@
-import {events, stepStatuses} from "./constants";
-import {tellReporter} from "./utils";
+import {events, stepStatuses} from "./constants"
+import {tellReporter} from "./utils"
 
 /**
  * Assign feature to test

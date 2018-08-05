@@ -1,4 +1,4 @@
-import {directory} from 'tempy';
+import {directory} from 'tempy'
 import AllureReporter from '../src/'
 import {runnerEnd, runnerStart} from './__fixtures__/runner'
 import {clean, getResults} from './helper'
@@ -6,28 +6,28 @@ import {suiteEnd, suiteStart} from './__fixtures__/suite'
 import {testFailed, testPassed, testPending, testStart} from './__fixtures__/testState'
 
 describe('Passing tests', () => {
-    const outputDir = directory();
-    let allureXml;
+    const outputDir = directory()
+    let allureXml
 
     beforeAll(() => {
-        const reporter = new AllureReporter({stdout: true, outputDir});
+        const reporter = new AllureReporter({stdout: true, outputDir})
 
         reporter.onRunnerStart(runnerStart())
         reporter.onSuiteStart(suiteStart())
         reporter.onTestStart(testStart())
-        reporter.addStory({storyName: 'Story'});
-        reporter.addFeature( {featureName: 'foo'});
-        reporter.addSeverity({severity: 'baz'});
-        reporter.addEnvironment({name: 'jenkins', value: '1.2.3'});
-        reporter.addDescription({description: 'functions', type: 'html'});
-        reporter.addAttachment({name: 'My attachment', content: '99thoughtz', type: 'text/plain'});
-        const step = {'step': {'attachment': {'content': 'baz', 'name': 'attachment'}, 'status': 'failed', 'title': 'foo'}};
+        reporter.addStory({storyName: 'Story'})
+        reporter.addFeature( {featureName: 'foo'})
+        reporter.addSeverity({severity: 'baz'})
+        reporter.addEnvironment({name: 'jenkins', value: '1.2.3'})
+        reporter.addDescription({description: 'functions', type: 'html'})
+        reporter.addAttachment({name: 'My attachment', content: '99thoughtz', type: 'text/plain'})
+        const step = {'step': {'attachment': {'content': 'baz', 'name': 'attachment'}, 'status': 'failed', 'title': 'foo'}}
         reporter.addStep(step)
         reporter.onTestPass(testPassed())
         reporter.onSuiteEnd(suiteEnd())
         reporter.onRunnerEnd(runnerEnd())
 
-        const results = getResults(outputDir);
+        const results = getResults(outputDir)
         expect(results).toHaveLength(1)
         allureXml = results[0]
     })
@@ -61,13 +61,13 @@ describe('Passing tests', () => {
         expect(allureXml('test-case label[name="feature"]').eq(0).attr('value')).toEqual('foo')
         expect(allureXml('test-case label[name="story"]').eq(0).attr('value')).toEqual('Story')
         expect(allureXml('test-case label[name="severity"]').eq(0).attr('value')).toEqual('baz')
-    });
+    })
 
     it('should add story, feature, severity labels', function () {
         expect(allureXml('test-case label[name="feature"]').eq(0).attr('value')).toEqual('foo')
         expect(allureXml('test-case label[name="story"]').eq(0).attr('value')).toEqual('Story')
         expect(allureXml('test-case label[name="severity"]').eq(0).attr('value')).toEqual('baz')
-    });
+    })
 
     it('should add environment variable', () => {
         expect(allureXml('test-case parameter[kind="environment-variable"]')).toHaveLength(1)
@@ -84,14 +84,14 @@ describe('Passing tests', () => {
     it('should add attachment', () => {
         expect(allureXml('test-case attachment[title="My attachment"]')).toHaveLength(1)
     })
-});
+})
 
 describe('Failed tests', () => {
-    let outputDir;
-    let allureXml;
+    let outputDir
+    let allureXml
 
     beforeEach(() => {
-        outputDir = directory();
+        outputDir = directory()
     })
 
     afterEach(() => {
@@ -99,7 +99,7 @@ describe('Failed tests', () => {
     })
 
     it('should detect failed test case', () => {
-        const reporter = new AllureReporter({stdout: true, outputDir});
+        const reporter = new AllureReporter({stdout: true, outputDir})
 
         reporter.onRunnerStart(runnerStart())
         reporter.onSuiteStart(suiteStart())
@@ -108,7 +108,7 @@ describe('Failed tests', () => {
         reporter.onSuiteEnd(suiteEnd())
         reporter.onRunnerEnd(runnerEnd())
 
-        const results = getResults(outputDir);
+        const results = getResults(outputDir)
         expect(results).toHaveLength(1)
         allureXml = results[0]
 
@@ -117,7 +117,7 @@ describe('Failed tests', () => {
     })
 
     it('should detect failed test case without start event', () => {
-        const reporter = new AllureReporter({stdout: true, outputDir});
+        const reporter = new AllureReporter({stdout: true, outputDir})
 
         reporter.onRunnerStart(runnerStart())
         reporter.onSuiteStart(suiteStart())
@@ -125,25 +125,25 @@ describe('Failed tests', () => {
         reporter.onSuiteEnd(suiteEnd())
         reporter.onRunnerEnd(runnerEnd())
 
-        const results = getResults(outputDir);
+        const results = getResults(outputDir)
         expect(results).toHaveLength(1)
         allureXml = results[0]
 
         expect(allureXml('test-case > name').text()).toEqual('should can do something')
         expect(allureXml('test-case').attr('status')).toEqual('failed')
     })
-});
+})
 
 describe('Pending tests', () => {
-    let outputDir;
+    let outputDir
 
     afterEach(() => {
         clean(outputDir)
     })
 
     it('should detect started pending test case', () => {
-        outputDir = directory();
-        const reporter = new AllureReporter({stdout: true, outputDir});
+        outputDir = directory()
+        const reporter = new AllureReporter({stdout: true, outputDir})
 
         reporter.onRunnerStart(runnerStart())
         reporter.onSuiteStart(suiteStart())
@@ -152,7 +152,7 @@ describe('Pending tests', () => {
         reporter.onSuiteEnd(suiteEnd())
         reporter.onRunnerEnd(runnerEnd())
 
-        const results = getResults(outputDir);
+        const results = getResults(outputDir)
         expect(results).toHaveLength(1)
         const allureXml = results[0]
 
@@ -161,8 +161,8 @@ describe('Pending tests', () => {
     })
 
     it('should detect not started pending test case', () => {
-        outputDir = directory();
-        const reporter = new AllureReporter({stdout: true, outputDir});
+        outputDir = directory()
+        const reporter = new AllureReporter({stdout: true, outputDir})
 
         reporter.onRunnerStart(runnerStart())
         reporter.onSuiteStart(suiteStart())
@@ -170,11 +170,11 @@ describe('Pending tests', () => {
         reporter.onSuiteEnd(suiteEnd())
         reporter.onRunnerEnd(runnerEnd())
 
-        const results = getResults(outputDir);
+        const results = getResults(outputDir)
         expect(results).toHaveLength(1)
         const allureXml = results[0]
 
         expect(allureXml('test-case > name').text()).toEqual('should can do something')
         expect(allureXml('test-case').attr('status')).toEqual('pending')
     })
-});
+})
