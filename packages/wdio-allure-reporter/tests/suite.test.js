@@ -40,22 +40,14 @@ describe('Passing tests', () => {
     })
 
     it('should detect analytics labels in test case', () => {
-        expect(allureXml('test-case label')).toHaveLength(4)
+        expect(allureXml('test-case label')).toHaveLength(2)
         expect(allureXml('test-case label[name="language"]').eq(0).attr('value')).toEqual('javascript')
         expect(allureXml('test-case label[name="framework"]').eq(0).attr('value')).toEqual('wdio')
-        expect(allureXml('test-case label[name="feature"]').eq(0).attr('value')).toEqual('feature foo bar')
-        expect(allureXml('test-case label[name="story"]').eq(0).attr('value')).toEqual('story foo bar')
     })
 
     it('should add browser name as test argument', () => {
         expect(allureXml('test-case parameter[kind="argument"]')).toHaveLength(1)
         expect(allureXml('test-case parameter[name="browser"]').eq(0).attr('value')).toEqual('chrome')
-    })
-
-    it('should add environment variables', () => {
-        expect(allureXml('test-case parameter[kind="environment-variable"]')).toHaveLength(2)
-        expect(allureXml('test-case parameter[name="capabilities"]').eq(0).attr('value')).toEqual('{"foo":"bar"}')
-        expect(allureXml('test-case parameter[name="spec files"]').eq(0).attr('value')).toEqual('["/tmp/user/spec.js"]')
     })
 });
 
