@@ -60,6 +60,13 @@ export default class BaseReporter {
         }
 
         /**
+         * check if reporter has reporterOptions
+         */
+        if (this.config.reporterOptions && this.config.reporterOptions[reporter]) {
+            options = Object.assign(options, this.config.reporterOptions[reporter])
+        }
+
+        /**
          * check if reporter has custom options
          */
         if (Array.isArray(reporter)) {

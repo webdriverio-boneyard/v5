@@ -44,6 +44,39 @@ describe('BaseReporter', () => {
         expect(reporter.getLogFile('foobar')).toBe(undefined)
     })
 
+    test('should load custom options', () => {
+        const reporter = new BaseReporter({
+            reporterOptions:{},
+            reporters: [
+                ['dot', { foo: 'bar' }]
+            ]
+        }, '0-0')
+
+        expect(reporter.reporters[0].options.foo).toBe('bar')
+    })
+
+    test('should load options from reporterOptions', () => {
+        const reporter = new BaseReporter({
+            reporterOptions:{dot: { foo: 'bar' }},
+            reporters: [
+                ['dot']
+            ]
+        }, '0-0')
+
+        expect(reporter.reporters[0].options.foo).toBe('bar')
+    })
+
+    test('should override reporterOptions by custom options', () => {
+        const reporter = new BaseReporter({
+            reporterOptions:{dot: { foo: 'bar' }},
+            reporters: [
+                ['dot', { foo: 'baz' }]
+            ]
+        }, '0-0')
+
+        expect(reporter.reporters[0].options.foo).toBe('baz')
+    })
+
     it('should emit events to all reporters', () => {
         const reporter = new BaseReporter({
             logDir: '/foo/bar',
