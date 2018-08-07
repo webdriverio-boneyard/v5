@@ -43,11 +43,12 @@ class AllureReporter extends WDIOReporter {
 
         const currentTest = this.allure.getCurrentTest()
 
-        currentTest.addParameter('argument', 'browser', this.config.capabilities.browserName || 'unknown')
+        currentTest.addParameter('argument', 'browser', this.config.capabilities.browserName || test.cid)
 
         // Allure analytics labels. See https://github.com/allure-framework/allure2/blob/master/Analytics.md
         currentTest.addLabel('language', 'javascript')
         currentTest.addLabel('framework', 'wdio')
+        currentTest.addLabel('thread', test.cid)
     }
 
     onTestPass() {
