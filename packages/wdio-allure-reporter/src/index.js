@@ -25,7 +25,7 @@ class AllureReporter extends WDIOReporter {
 
     onRunnerStart(runner) {
         this.config = runner.config
-        this.isMultiremote = runner.isMultiremote
+        this.isMultiremote = runner.isMultiremote || false
     }
 
     onSuiteStart(suite) {
