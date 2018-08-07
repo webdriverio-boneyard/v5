@@ -199,3 +199,93 @@ describe('auxiliary methods', () => {
     })
 })
 
+describe('hooks handling', () => {
+    it('should add test on custom hook', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const startCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => true),
+            startCase
+        }
+        reporter.onHookStart({title: 'foo'});
+
+        expect(startCase).toHaveBeenCalledTimes(1)
+        expect(startCase).toHaveBeenCalledWith('foo')
+    })
+
+    it('should not add test if no suite', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const startCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => false),
+            startCase
+        }
+        reporter.onHookStart({title: 'foo'});
+
+        expect(startCase).toHaveBeenCalledTimes(0)
+    })
+
+    it('should not add test if it is ignored hook', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const startCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => true),
+            startCase
+        }
+        reporter.onHookStart({title: '"before all" hook'});
+
+        expect(startCase).toHaveBeenCalledTimes(0)
+    })
+
+    it('should end test onHookEnd', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const endCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => true),
+            getCurrentTest: jest.fn(() => {return {steps: [1]}}),
+            endCase
+        }
+        reporter.onHookEnd({title: 'foo'});
+
+        expect(endCase).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not end test onHookEnd if no suite', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const endCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => false),
+            endCase
+        }
+        reporter.onHookEnd({title: 'foo'});
+
+        expect(endCase).toHaveBeenCalledTimes(0)
+    })
+
+    it('should not end test if no hook ignored', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const endCase = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => true),
+            endCase
+        }
+        reporter.onHookEnd({title: '"after all" hook'});
+
+        expect(endCase).toHaveBeenCalledTimes(0)
+    })
+})
+
+describe('nested suite naming', () => {
+    it('should not end test if no hook ignored', () => {
+        const reporter = new AllureReporter({stdout: true})
+        const startSuite = jest.fn()
+        reporter.allure = {
+            getCurrentSuite: jest.fn(() => {return {name: 'foo'}}),
+            startSuite
+        }
+        reporter.onSuiteStart({title: 'bar'});
+
+        expect(startSuite).toHaveBeenCalledTimes(1)
+        expect(startSuite).toHaveBeenCalledWith('foo bar')
+    })
+})
