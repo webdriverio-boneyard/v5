@@ -26,4 +26,6 @@ const events = {
     addStep: 'allure:addStep'
 }
 
-export {testStatuses, stepStatuses, events}
+const mochaIgnoredHooks = ['"before all" hook', '"after all" hook', '"before each" hook', '"after each" hook']
+
+export {testStatuses, stepStatuses, events, mochaIgnoredHooks}
