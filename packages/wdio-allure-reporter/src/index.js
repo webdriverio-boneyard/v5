@@ -89,8 +89,8 @@ class AllureReporter extends WDIOReporter {
 
         this.allure.startStep(`${command.method} ${command.endpoint}`)
 
-        if (!isEmpty(command.data)) {
-            this.dumpJSON(this.allure, 'Request', command.body)
+        if (!isEmpty(command.body)) {
+            this.dumpJSON('Request', command.body)
         }
     }
 
@@ -114,16 +114,16 @@ class AllureReporter extends WDIOReporter {
     }
 
     onHookStart(hook) {
-        if (!this.allure.getCurrentSuite() || !ignoredHooks(hook.title)) {
-            return
+        if (!this.allure.getCurrentSuite() || ignoredHooks(hook.title)) {
+            return false
         }
 
         this.allure.startCase(hook.title)
     }
 
     onHookEnd(hook) {
-        if (!this.allure.getCurrentSuite() || !ignoredHooks(hook.title)) {
-            return
+        if (!this.allure.getCurrentSuite() || ignoredHooks(hook.title)) {
+            return false
         }
 
         this.allure.endCase(testStatuses.PASSED)

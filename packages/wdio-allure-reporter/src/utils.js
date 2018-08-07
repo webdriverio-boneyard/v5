@@ -33,7 +33,7 @@ export const isEmpty = (object) => !object || Object.keys(object).length === 0
  * @returns {boolean}
  * @private
  */
-export const ignoredHooks = title => ['"before all" hook', '"after all" hook'].some(hook => title.includes(hook))
+export const ignoredHooks = title => ['"before all" hook', '"after all" hook', '"before each" hook', '"after each" hook'].some(hook => title.includes(hook))
 
 /**
  * Call reporter

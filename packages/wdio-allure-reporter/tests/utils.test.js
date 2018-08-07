@@ -38,6 +38,8 @@ describe('utils', () => {
     it('ignoredHook filter hook by title', () => {
         expect(ignoredHooks('"before all" hook')).toEqual(true)
         expect(ignoredHooks('"after all" hook')).toEqual(true)
+        expect(ignoredHooks('"before each" hook')).toEqual(true)
+        expect(ignoredHooks('"after each" hook')).toEqual(true)
     })
 
     it('isEmpty filter empty objects', () => {
