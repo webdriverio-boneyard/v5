@@ -21,7 +21,7 @@ export default class TestingBotService {
 
         config.protocol = 'http'
         config.host = 'localhost'
-        config.port = 4445
+        config.port = this.tbTunnelOpts.port || 4445
 
         return new Promise((resolve, reject) => testingbotTunnel(this.tbTunnelOpts, (err, tunnel) => {
             /* istanbul ignore if */
